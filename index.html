@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -1089,3 +1090,831 @@
     </script>
 </body>
 </html>
+=======
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>图片滚动展示器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        /* 确保所有文字都是铜色 */
+        body, h1, h2, h3, p, span, div, label, button {
+            color: #CD7F32 !important;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            width: 100%;
+            position: relative;
+        }
+
+        h1 {
+            text-align: center;
+            color: #CD7F32;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .image-container {
+            position: relative;
+            width: 100%;
+            height: 500px;
+            overflow: hidden;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            margin-bottom: 30px;
+            background: #f0f0f0;
+        }
+
+        .scrolling-image {
+            position: absolute;
+            width: 100%;
+            height: auto;
+            object-fit: cover;
+            transition: transform 0.1s ease-out;
+            cursor: grab;
+        }
+
+        .scrolling-image:active {
+            cursor: grabbing;
+        }
+
+        .image-container {
+            position: relative;
+            width: 100%;
+            height: 500px;
+            overflow: hidden;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            margin-bottom: 30px;
+            background: #f0f0f0;
+            user-select: none;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .control-group label {
+            font-weight: bold;
+            color: #CD7F32;
+            font-size: 1.1em;
+        }
+
+        .speed-slider {
+            width: 150px;
+            height: 8px;
+            border-radius: 5px;
+            background: #ddd;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .speed-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        .speed-slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-primary {
+            background: #CD7F32;
+            color: white !important;
+        }
+
+        .btn-secondary {
+            background: #CD7F32;
+            color: white !important;
+        }
+
+        .btn-success {
+            background: #CD7F32;
+            color: white !important;
+        }
+
+        .speed-display {
+            background: #667eea;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            min-width: 80px;
+            text-align: center;
+        }
+
+        .status {
+            text-align: center;
+            font-size: 1.2em;
+            color: #CD7F32;
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 10px;
+            transition: opacity 0.3s ease;
+        }
+        
+        .status.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .toggle-controls {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: #CD7F32;
+            color: white !important;
+            padding: 12px;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            z-index: 1001;
+            backdrop-filter: blur(10px);
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-controls:hover {
+            background: #B8860B;
+            transform: scale(1.1);
+        }
+
+        .controls-panel {
+            position: absolute;
+            top: 70px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            min-width: 300px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .controls-panel .control-group {
+            margin-bottom: 15px;
+        }
+
+        .controls-panel .control-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .controls-panel .control-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #CD7F32;
+            font-size: 14px;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .file-label {
+            background: #CD7F32;
+            color: white !important;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .file-label:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-music {
+            background: #CD7F32;
+            color: white !important;
+            font-size: 0.9em;
+            padding: 8px 16px;
+        }
+
+        .btn-music:hover {
+            background: #B8860B;
+        }
+
+        .music-label {
+            background: #CD7F32;
+        }
+
+        .volume-slider {
+            width: 100px;
+            height: 6px;
+            border-radius: 3px;
+            background: #ddd;
+            outline: none;
+            -webkit-appearance: none;
+            margin: 0 10px;
+        }
+
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #ff6b6b;
+            cursor: pointer;
+        }
+
+        .volume-slider::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #ff6b6b;
+            cursor: pointer;
+            border: none;
+        }
+
+        #volumeDisplay {
+            font-weight: bold;
+            color: #CD7F32;
+            min-width: 40px;
+            display: inline-block;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+            
+            .controls {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .image-container {
+                height: 400px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+            <div class="container">
+            <button class="toggle-controls" id="toggleControls" title="控制面板">⚙️</button>
+            <h1>🖼️ 图片滚动展示器</h1>
+        
+        <div class="image-container" id="imageContainer">
+            <img id="scrollingImage" class="scrolling-image" alt="滚动图片">
+        </div>
+        
+        <!-- 隐藏的音频播放器 -->
+        <audio id="backgroundMusic" preload="auto" loop>
+            您的浏览器不支持音频播放。
+        </audio>
+        
+
+        <div class="status" id="status">
+            状态: 准备就绪 - 请选择图片文件
+        </div>
+        
+        <!-- 控制面板 -->
+        <div class="controls-panel" id="controlsPanel" style="display: none;">
+            <div class="control-group">
+                <label for="speedSlider">滚动速度</label>
+                <input type="range" id="speedSlider" class="speed-slider" min="1" max="20" value="1">
+                <div class="speed-display" id="speedDisplay">1</div>
+            </div>
+            
+            <div class="control-group">
+                <label>控制按钮</label>
+                <div style="display: flex; gap: 10px;">
+                    <button id="playBtn" class="btn btn-primary">▶️ 播放</button>
+                    <button id="pauseBtn" class="btn btn-secondary">⏸️ 暂停</button>
+                    <button id="resetBtn" class="btn btn-success">🔄 重置</button>
+                </div>
+            </div>
+            
+            <div class="control-group">
+                <label>选择图片</label>
+                <input type="file" id="fileInput" class="file-input" accept="image/*">
+                <label for="fileInput" class="file-label">📁 选择图片</label>
+            </div>
+            
+            <div class="control-group">
+                <label>背景音乐</label>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
+                    <input type="file" id="musicInput" class="file-input" accept="audio/*">
+                    <label for="musicInput" class="file-label music-label">🎵 选择音乐</label>
+                    <button id="musicPlayBtn" class="btn btn-music">▶️ 播放音乐</button>
+                    <button id="musicPauseBtn" class="btn btn-music">⏸️ 暂停音乐</button>
+                    <button id="musicStopBtn" class="btn btn-music">⏹️ 停止音乐</button>
+                </div>
+                <div style="margin-top: 10px;">
+                    <label for="volumeSlider">音量</label>
+                    <input type="range" id="volumeSlider" class="volume-slider" min="0" max="100" value="50">
+                    <span id="volumeDisplay">50%</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class ImageScroller {
+            constructor() {
+                this.image = document.getElementById('scrollingImage');
+                this.container = document.getElementById('imageContainer');
+                this.speedSlider = document.getElementById('speedSlider');
+                this.speedDisplay = document.getElementById('speedDisplay');
+                this.playBtn = document.getElementById('playBtn');
+                this.pauseBtn = document.getElementById('pauseBtn');
+                this.resetBtn = document.getElementById('resetBtn');
+                this.fileInput = document.getElementById('fileInput');
+                this.status = document.getElementById('status');
+                
+                // 音乐控制元素
+                this.musicInput = document.getElementById('musicInput');
+                this.musicPlayBtn = document.getElementById('musicPlayBtn');
+                this.musicPauseBtn = document.getElementById('musicPauseBtn');
+                this.musicStopBtn = document.getElementById('musicStopBtn');
+                this.volumeSlider = document.getElementById('volumeSlider');
+                this.volumeDisplay = document.getElementById('volumeDisplay');
+                this.backgroundMusic = document.getElementById('backgroundMusic');
+                
+                this.isPlaying = false;
+                this.currentPosition = 0;
+                this.animationId = null;
+                this.speed = 1;
+                this.direction = 1; // 1 for down, -1 for up
+                
+                // 音乐状态
+                this.isMusicPlaying = false;
+                this.currentMusicFile = null;
+                
+                // 拖拽状态
+                this.isDragging = false;
+                this.startY = 0;
+                this.startPosition = 0;
+                this.lastY = 0;
+                this.velocity = 0;
+                this.lastTime = 0;
+                
+                this.init();
+            }
+            
+            init() {
+                this.bindEvents();
+                this.updateSpeed();
+                
+                // 尝试加载默认图片
+                this.loadDefaultImage();
+            }
+            
+            bindEvents() {
+                this.speedSlider.addEventListener('input', () => this.updateSpeed());
+                this.playBtn.addEventListener('click', () => this.play());
+                this.pauseBtn.addEventListener('click', () => this.pause());
+                this.resetBtn.addEventListener('click', () => this.reset());
+                this.fileInput.addEventListener('change', (e) => this.handleFileSelect(e));
+                
+                // 音乐控制事件
+                this.musicInput.addEventListener('change', (e) => this.handleMusicSelect(e));
+                this.musicPlayBtn.addEventListener('click', () => this.playMusic());
+                this.musicPauseBtn.addEventListener('click', () => this.pauseMusic());
+                this.musicStopBtn.addEventListener('click', () => this.stopMusic());
+                this.volumeSlider.addEventListener('input', () => this.updateVolume());
+                
+                // 拖拽事件
+                this.image.addEventListener('mousedown', (e) => this.startDrag(e));
+                this.image.addEventListener('mousemove', (e) => this.drag(e));
+                this.image.addEventListener('mouseup', (e) => this.endDrag(e));
+                this.image.addEventListener('mouseleave', (e) => this.endDrag(e));
+                
+                // 触摸事件支持
+                this.image.addEventListener('touchstart', (e) => this.startTouch(e));
+                this.image.addEventListener('touchmove', (e) => this.touchMove(e));
+                this.image.addEventListener('touchend', (e) => this.endTouch(e));
+                
+                // 点击图片切换方向（需要区分拖拽和点击）
+                this.image.addEventListener('click', (e) => this.handleImageClick(e));
+                
+                // 控制面板切换
+                document.getElementById('toggleControls').addEventListener('click', () => this.toggleControlsPanel());
+            }
+            
+            async loadDefaultImage() {
+                try {
+                    // 尝试加载用户指定的图片路径
+                    const defaultImagePath = 'C:\\Users\\Whalew\\Downloads\\IMG_6380.JPG';
+                    // 注意：由于浏览器安全限制，无法直接访问本地文件系统
+                    // 这里会显示提示信息
+                    this.status.textContent = '状态: 请使用"选择图片"按钮选择图片文件';
+                } catch (error) {
+                    this.status.textContent = '状态: 请选择图片文件';
+                }
+            }
+            
+            handleFileSelect(event) {
+                const file = event.target.files[0];
+                if (file && file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        this.image.src = e.target.result;
+                        this.status.textContent = '状态: 图片已加载，点击播放开始滚动';
+                        this.reset();
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    this.status.textContent = '状态: 请选择有效的图片文件';
+                }
+            }
+            
+            updateSpeed() {
+                this.speed = parseInt(this.speedSlider.value);
+                this.speedDisplay.textContent = this.speed;
+                
+                if (this.isPlaying) {
+                    this.pause();
+                    this.play();
+                }
+            }
+            
+            play() {
+                if (!this.image.src || this.image.src === 'data:') {
+                    this.status.textContent = '状态: 请先选择图片文件';
+                    return;
+                }
+                
+                this.isPlaying = true;
+                this.playBtn.disabled = true;
+                this.pauseBtn.disabled = false;
+                this.status.textContent = `状态: 正在播放 - 速度: ${this.speed}`;
+                
+                this.animate();
+                
+                // 播放时隐藏状态栏
+                setTimeout(() => {
+                    this.status.classList.add('hidden');
+                }, 2000);
+            }
+            
+            pause() {
+                this.isPlaying = false;
+                this.playBtn.disabled = false;
+                this.pauseBtn.disabled = true;
+                this.status.textContent = '状态: 已暂停';
+                this.status.classList.remove('hidden');
+                
+                if (this.animationId) {
+                    cancelAnimationFrame(this.animationId);
+                    this.animationId = null;
+                }
+            }
+            
+            reset() {
+                this.pause();
+                this.currentPosition = 0;
+                this.direction = 1;
+                this.image.style.transform = 'translateY(0px)';
+                this.status.textContent = '状态: 已重置到起始位置';
+                this.status.classList.remove('hidden');
+            }
+            
+            toggleDirection() {
+                this.direction *= -1;
+                const directionText = this.direction === 1 ? '向下' : '向上';
+                this.status.textContent = `状态: 滚动方向已切换为${directionText}`;
+            }
+            
+            // 拖拽相关方法
+            startDrag(event) {
+                event.preventDefault();
+                this.isDragging = true;
+                this.startY = event.clientY;
+                this.startPosition = this.currentPosition;
+                this.lastY = this.startY;
+                this.lastTime = Date.now();
+                this.velocity = 0;
+                
+                // 暂停自动播放
+                if (this.isPlaying) {
+                    this.pause();
+                }
+                
+                this.status.textContent = '状态: 拖拽中 - 可上下拖动图片';
+            }
+            
+            drag(event) {
+                if (!this.isDragging) return;
+                
+                event.preventDefault();
+                const currentY = event.clientY;
+                const deltaY = this.startY - currentY;
+                const newPosition = this.startPosition + deltaY;
+                
+                // 限制拖拽范围
+                const containerHeight = this.container.clientHeight;
+                const imageHeight = this.image.naturalHeight;
+                const maxScroll = Math.max(0, imageHeight - containerHeight);
+                
+                if (maxScroll > 0) {
+                    this.currentPosition = Math.max(0, Math.min(maxScroll, newPosition));
+                    this.image.style.transform = `translateY(-${this.currentPosition}px)`;
+                }
+                
+                // 计算速度
+                const currentTime = Date.now();
+                const timeDelta = currentTime - this.lastTime;
+                if (timeDelta > 0) {
+                    this.velocity = (this.lastY - currentY) / timeDelta;
+                }
+                this.lastY = currentY;
+                this.lastTime = currentTime;
+            }
+            
+            endDrag(event) {
+                if (!this.isDragging) return;
+                
+                this.isDragging = false;
+                
+                // 应用惯性滚动
+                if (Math.abs(this.velocity) > 0.5) {
+                    this.applyInertia();
+                } else {
+                    this.status.textContent = '状态: 拖拽结束';
+                }
+            }
+            
+            // 触摸事件支持
+            startTouch(event) {
+                event.preventDefault();
+                const touch = event.touches[0];
+                this.isDragging = true;
+                this.startY = touch.clientY;
+                this.startPosition = this.currentPosition;
+                this.lastY = this.startY;
+                this.lastTime = Date.now();
+                this.velocity = 0;
+                
+                // 暂停自动播放
+                if (this.isPlaying) {
+                    this.pause();
+                }
+                
+                this.status.textContent = '状态: 触摸拖拽中';
+            }
+            
+            touchMove(event) {
+                if (!this.isDragging) return;
+                
+                event.preventDefault();
+                const touch = event.touches[0];
+                const currentY = touch.clientY;
+                const deltaY = this.startY - currentY;
+                const newPosition = this.startPosition + deltaY;
+                
+                // 限制拖拽范围
+                const containerHeight = this.container.clientHeight;
+                const imageHeight = this.image.naturalHeight;
+                const maxScroll = Math.max(0, imageHeight - containerHeight);
+                
+                if (maxScroll > 0) {
+                    this.currentPosition = Math.max(0, Math.min(maxScroll, newPosition));
+                    this.image.style.transform = `translateY(-${this.currentPosition}px)`;
+                }
+                
+                // 计算速度
+                const currentTime = Date.now();
+                const timeDelta = currentTime - this.lastTime;
+                if (timeDelta > 0) {
+                    this.velocity = (this.lastY - currentY) / timeDelta;
+                }
+                this.lastY = currentY;
+                this.lastTime = currentTime;
+            }
+            
+            endTouch(event) {
+                if (!this.isDragging) return;
+                
+                this.isDragging = false;
+                
+                // 应用惯性滚动
+                if (Math.abs(this.velocity) > 0.5) {
+                    this.applyInertia();
+                } else {
+                    this.status.textContent = '状态: 触摸拖拽结束';
+                }
+            }
+            
+            // 惯性滚动
+            applyInertia() {
+                const friction = 0.95;
+                const animate = () => {
+                    if (Math.abs(this.velocity) < 0.1) {
+                        this.status.textContent = '状态: 惯性滚动结束';
+                        return;
+                    }
+                    
+                    this.velocity *= friction;
+                    this.currentPosition += this.velocity * 16; // 16ms per frame
+                    
+                    // 限制范围
+                    const containerHeight = this.container.clientHeight;
+                    const imageHeight = this.image.naturalHeight;
+                    const maxScroll = Math.max(0, imageHeight - containerHeight);
+                    
+                    if (this.currentPosition < 0) {
+                        this.currentPosition = 0;
+                        this.velocity = 0;
+                    } else if (this.currentPosition > maxScroll) {
+                        this.currentPosition = maxScroll;
+                        this.velocity = 0;
+                    }
+                    
+                    this.image.style.transform = `translateY(-${this.currentPosition}px)`;
+                    requestAnimationFrame(animate);
+                };
+                
+                animate();
+            }
+            
+            // 处理图片点击（区分拖拽和点击）
+            handleImageClick(event) {
+                // 如果拖拽距离很小，认为是点击
+                const dragDistance = Math.abs(event.clientY - this.startY);
+                if (dragDistance < 5 && !this.isDragging) {
+                    this.toggleDirection();
+                }
+            }
+            
+            // 音乐控制方法
+            handleMusicSelect(event) {
+                const file = event.target.files[0];
+                if (file && file.type.startsWith('audio/')) {
+                    this.currentMusicFile = file;
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        this.backgroundMusic.src = e.target.result;
+                        this.status.textContent = `状态: 音乐已加载 - ${file.name}`;
+                        this.musicPlayBtn.disabled = false;
+                        this.musicPauseBtn.disabled = true;
+                        this.musicStopBtn.disabled = true;
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    this.status.textContent = '状态: 请选择有效的音频文件';
+                }
+            }
+            
+            playMusic() {
+                if (!this.backgroundMusic.src || this.backgroundMusic.src === 'data:') {
+                    this.status.textContent = '状态: 请先选择音乐文件';
+                    return;
+                }
+                
+                this.backgroundMusic.play().then(() => {
+                    this.isMusicPlaying = true;
+                    this.musicPlayBtn.disabled = true;
+                    this.musicPauseBtn.disabled = false;
+                    this.musicStopBtn.disabled = false;
+                    this.status.textContent = '状态: 音乐正在播放';
+                }).catch(error => {
+                    this.status.textContent = '状态: 音乐播放失败 - ' + error.message;
+                });
+            }
+            
+            pauseMusic() {
+                this.backgroundMusic.pause();
+                this.isMusicPlaying = false;
+                this.musicPlayBtn.disabled = false;
+                this.musicPauseBtn.disabled = true;
+                this.musicStopBtn.disabled = false;
+                this.status.textContent = '状态: 音乐已暂停';
+            }
+            
+            stopMusic() {
+                this.backgroundMusic.pause();
+                this.backgroundMusic.currentTime = 0;
+                this.isMusicPlaying = false;
+                this.musicPlayBtn.disabled = false;
+                this.musicPauseBtn.disabled = true;
+                this.musicStopBtn.disabled = true;
+                this.status.textContent = '状态: 音乐已停止';
+            }
+            
+            updateVolume() {
+                const volume = this.volumeSlider.value / 100;
+                this.backgroundMusic.volume = volume;
+                this.volumeDisplay.textContent = this.volumeSlider.value + '%';
+            }
+            
+            toggleControlsPanel() {
+                const controlsPanel = document.getElementById('controlsPanel');
+                const isVisible = controlsPanel.style.display !== 'none';
+                controlsPanel.style.display = isVisible ? 'none' : 'block';
+                
+                const toggleBtn = document.getElementById('toggleControls');
+                toggleBtn.title = isVisible ? '显示控制面板' : '隐藏控制面板';
+            }
+            
+            animate() {
+                if (!this.isPlaying) return;
+                
+                const containerHeight = this.container.clientHeight;
+                const imageHeight = this.image.naturalHeight;
+                const maxScroll = Math.max(0, imageHeight - containerHeight);
+                
+                if (maxScroll > 0) {
+                    this.currentPosition += this.direction * this.speed;
+                    
+                    // 循环滚动
+                    if (this.currentPosition >= maxScroll) {
+                        this.currentPosition = 0;
+                    } else if (this.currentPosition <= 0) {
+                        this.currentPosition = maxScroll;
+                    }
+                    
+                    this.image.style.transform = `translateY(-${this.currentPosition}px)`;
+                }
+                
+                this.animationId = requestAnimationFrame(() => this.animate());
+            }
+        }
+        
+        // 初始化应用
+        document.addEventListener('DOMContentLoaded', () => {
+            new ImageScroller();
+        });
+        
+
+    </script>
+</body>
+</html>
+>>>>>>> 269ffa1a1db39cf3bbf88877a426a6c574d06be6
