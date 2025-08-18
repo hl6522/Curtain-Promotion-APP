@@ -1,78 +1,33 @@
-<<<<<<< HEAD
 {
   "name": "WHL窗帘布艺展示器",
   "short_name": "WHL窗帘",
   "description": "专业的窗帘布艺产品展示应用，支持图片滚动展示、背景音乐和投屏功能",
-  "start_url": "/mobile.html",
+  "start_url": "./mobile.html",
   "display": "standalone",
   "background_color": "#000000",
   "theme_color": "#CD7F32",
   "orientation": "portrait-primary",
-  "scope": "/",
+  "scope": "./",
   "lang": "zh-CN",
   "categories": ["business", "productivity", "entertainment"],
   "icons": [
     {
-      "src": "Icons/icon-72x72.png",
-      "sizes": "72x72",
-      "type": "image/png",
-      "purpose": "maskable any"
+      "src": "Icons/facebook.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
     },
     {
-      "src": "Icons/icon-96x96.png",
-      "sizes": "96x96",
-      "type": "image/png",
-      "purpose": "maskable any"
+      "src": "Icons/tiktok.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
     },
     {
-      "src": "Icons/icon-128x128.png",
-      "sizes": "128x128",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "Icons/icon-144x144.png",
-      "sizes": "144x144",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "Icons/icon-152x152.png",
-      "sizes": "152x152",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "Icons/icon-192x192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "Icons/icon-384x384.png",
-      "sizes": "384x384",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "Icons/icon-512x512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable any"
-    }
-  ],
-  "screenshots": [
-    {
-      "src": "screenshots/mobile-1.png",
-      "sizes": "390x844",
-      "type": "image/png",
-      "form_factor": "narrow"
-    },
-    {
-      "src": "screenshots/desktop-1.png",
-      "sizes": "1920x1080",
-      "type": "image/png",
-      "form_factor": "wide"
+      "src": "Icons/youtube.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
     }
   ],
   "shortcuts": [
@@ -80,37 +35,19 @@
       "name": "产品目录",
       "short_name": "目录",
       "description": "浏览所有产品分类",
-      "url": "/catalog.html",
-      "icons": [
-        {
-          "src": "Icons/catalog-icon.png",
-          "sizes": "96x96"
-        }
-      ]
+      "url": "./catalog.html"
     },
     {
       "name": "全屏播放",
       "short_name": "播放",
       "description": "进入全屏播放模式",
-      "url": "/fullscreen.html",
-      "icons": [
-        {
-          "src": "Icons/play-icon.png",
-          "sizes": "96x96"
-        }
-      ]
+      "url": "./fullscreen.html"
     },
     {
       "name": "投屏播放",
       "short_name": "投屏",
       "description": "投屏到电视大屏",
-      "url": "/mobile.html#cast",
-      "icons": [
-        {
-          "src": "Icons/cast-icon.png",
-          "sizes": "96x96"
-        }
-      ]
+      "url": "./mobile.html#cast"
     }
   ],
   "related_applications": [
@@ -120,154 +57,5 @@
     }
   ],
   "prefer_related_applications": false,
-  "display_override": ["standalone", "minimal-ui"],
-  "edge_side_panel": {
-    "preferred_width": 400
-  },
-  "launch_handler": {
-    "client_mode": "navigate-existing"
-  },
-  "protocol_handlers": [
-    {
-      "protocol": "web+whl",
-      "url": "/mobile.html?action=%s"
-    }
-  ]
+  "display_override": ["standalone", "minimal-ui"]
 }
-=======
-{
-  "name": "WHL窗帘布艺展示器",
-  "short_name": "WHL窗帘",
-  "description": "专业的窗帘布艺产品展示应用，支持图片滚动展示、背景音乐和投屏功能",
-  "start_url": "/mobile.html",
-  "display": "standalone",
-  "background_color": "#000000",
-  "theme_color": "#CD7F32",
-  "orientation": "portrait-primary",
-  "scope": "/",
-  "lang": "zh-CN",
-  "categories": ["business", "productivity", "entertainment"],
-  "icons": [
-    {
-      "src": "Icons/icon-72x72.png",
-      "sizes": "72x72",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "Icons/icon-96x96.png",
-      "sizes": "96x96",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "Icons/icon-128x128.png",
-      "sizes": "128x128",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "Icons/icon-144x144.png",
-      "sizes": "144x144",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "Icons/icon-152x152.png",
-      "sizes": "152x152",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "Icons/icon-192x192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "Icons/icon-384x384.png",
-      "sizes": "384x384",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "Icons/icon-512x512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable any"
-    }
-  ],
-  "screenshots": [
-    {
-      "src": "screenshots/mobile-1.png",
-      "sizes": "390x844",
-      "type": "image/png",
-      "form_factor": "narrow"
-    },
-    {
-      "src": "screenshots/desktop-1.png",
-      "sizes": "1920x1080",
-      "type": "image/png",
-      "form_factor": "wide"
-    }
-  ],
-  "shortcuts": [
-    {
-      "name": "产品目录",
-      "short_name": "目录",
-      "description": "浏览所有产品分类",
-      "url": "/catalog.html",
-      "icons": [
-        {
-          "src": "Icons/catalog-icon.png",
-          "sizes": "96x96"
-        }
-      ]
-    },
-    {
-      "name": "全屏播放",
-      "short_name": "播放",
-      "description": "进入全屏播放模式",
-      "url": "/fullscreen.html",
-      "icons": [
-        {
-          "src": "Icons/play-icon.png",
-          "sizes": "96x96"
-        }
-      ]
-    },
-    {
-      "name": "投屏播放",
-      "short_name": "投屏",
-      "description": "投屏到电视大屏",
-      "url": "/mobile.html#cast",
-      "icons": [
-        {
-          "src": "Icons/cast-icon.png",
-          "sizes": "96x96"
-        }
-      ]
-    }
-  ],
-  "related_applications": [
-    {
-      "platform": "webapp",
-      "url": "https://www.whlus.com"
-    }
-  ],
-  "prefer_related_applications": false,
-  "display_override": ["standalone", "minimal-ui"],
-  "edge_side_panel": {
-    "preferred_width": 400
-  },
-  "launch_handler": {
-    "client_mode": "navigate-existing"
-  },
-  "protocol_handlers": [
-    {
-      "protocol": "web+whl",
-      "url": "/mobile.html?action=%s"
-    }
-  ]
-}
->>>>>>> 269ffa1a1db39cf3bbf88877a426a6c574d06be6

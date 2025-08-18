@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 const CACHE_NAME = 'whl-curtains-v1.0.0';
 const STATIC_CACHE = 'static-v1';
 const DYNAMIC_CACHE = 'dynamic-v1';
@@ -24,14 +23,14 @@ const STATIC_ASSETS = [
 const IMAGE_ASSETS = [
   '/Products/WHL窗帘-枝叶绣.jpg',
   '/Products/云花轻梦-灰白.jpg',
-  '/Products/凡尔赛-雾灰.JPG',
+  '/Products/凡尔赛-雾灰.jpg',
   '/Products/半夏棉麻.jpg',
   '/Products/卵石海岸.jpg',
   '/Products/幕洛编织麻.jpg',
   '/Products/弗特伊-暮金.jpg',
   '/Products/弗特伊-雾灰.jpg',
-  '/Products/斑马帘.JPG',
-  '/Products/旷野-米咖.JPG',
+  '/Products/斑马帘.jpg',
+  '/Products/旷野-米咖.jpg',
   '/Products/松叶绣雪尼尔.jpg',
   '/Products/枝叶绣-雾蓝.jpg',
   '/Products/树纹纱.jpg',
