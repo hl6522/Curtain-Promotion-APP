@@ -2,825 +2,1090 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>图片滚动展示器</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>WHL窗帘 - 移动版</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#CD7F32">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="WHL窗帘">
+    <meta name="msapplication-TileColor" content="#CD7F32">
+    
+    <!-- PWA Icons -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/Icons/icon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/Icons/icon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/Icons/apple-touch-icon.png">
+    <link rel="manifest" href="/manifest.json">
+    
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
-        /* 确保所有文字都是铜色 */
-        body, h1, h2, h3, p, span, div, label, button {
-            color: #CD7F32 !important;
+
+        :root {
+            --primary-color: #CD7F32;
+            --secondary-color: #B8860B;
+            --background-color: #000000;
+            --card-bg: #1a1a1a;
+            --text-color: #CD7F32;
+            --border-color: rgba(205, 127, 50, 0.3);
+            --shadow-color: rgba(205, 127, 50, 0.2);
         }
 
         body {
-            font-family: 'Microsoft YaHei', Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Microsoft YaHei', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--background-color);
+            color: var(--text-color);
             min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px;
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+            overflow-x: hidden;
         }
 
-        .container {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-            max-width: 800px;
-            width: 100%;
-            position: relative;
-        }
-
-        h1 {
-            text-align: center;
-            color: #CD7F32;
-            margin-bottom: 30px;
-            font-size: 2.5em;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        .image-container {
-            position: relative;
-            width: 100%;
-            height: 500px;
-            overflow: hidden;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            margin-bottom: 30px;
-            background: #f0f0f0;
-        }
-
-        .scrolling-image {
-            position: absolute;
-            width: 100%;
-            height: auto;
-            object-fit: cover;
-            transition: transform 0.1s ease-out;
-            cursor: grab;
-        }
-
-        .scrolling-image:active {
-            cursor: grabbing;
-        }
-
-        .image-container {
-            position: relative;
-            width: 100%;
-            height: 500px;
-            overflow: hidden;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            margin-bottom: 30px;
-            background: #f0f0f0;
-            user-select: none;
-        }
-
-        .controls {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            justify-content: center;
-            align-items: center;
-            margin-bottom: 30px;
-        }
-
-        .control-group {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .control-group label {
-            font-weight: bold;
-            color: #CD7F32;
-            font-size: 1.1em;
-        }
-
-        .speed-slider {
-            width: 150px;
-            height: 8px;
-            border-radius: 5px;
-            background: #ddd;
-            outline: none;
-            -webkit-appearance: none;
-        }
-
-        .speed-slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: #667eea;
-            cursor: pointer;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-        }
-
-        .speed-slider::-moz-range-thumb {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: #667eea;
-            cursor: pointer;
-            border: none;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-        }
-
-        .btn {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 25px;
-            font-size: 1.1em;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-        }
-
-        .btn-primary {
-            background: #CD7F32;
-            color: white !important;
-        }
-
-        .btn-secondary {
-            background: #CD7F32;
-            color: white !important;
-        }
-
-        .btn-success {
-            background: #CD7F32;
-            color: white !important;
-        }
-
-        .speed-display {
-            background: #667eea;
-            color: white;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-weight: bold;
-            min-width: 80px;
-            text-align: center;
-        }
-
-        .status {
-            text-align: center;
-            font-size: 1.2em;
-            color: #CD7F32;
-            margin-top: 20px;
-            padding: 15px;
-            background: rgba(102, 126, 234, 0.1);
-            border-radius: 10px;
-            transition: opacity 0.3s ease;
-        }
-        
-        .status.hidden {
-            opacity: 0;
-            pointer-events: none;
-        }
-
-        .toggle-controls {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: #CD7F32;
-            color: white !important;
-            padding: 12px;
-            border: none;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 18px;
-            z-index: 1001;
-            backdrop-filter: blur(10px);
-            width: 44px;
-            height: 44px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-        }
-
-        .toggle-controls:hover {
-            background: #B8860B;
-            transform: scale(1.1);
-        }
-
-        .controls-panel {
-            position: absolute;
-            top: 70px;
-            right: 20px;
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        /* 顶部导航栏 */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            padding: max(20px, env(safe-area-inset-top)) 20px 20px;
             z-index: 1000;
-            min-width: 300px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-color);
         }
 
-        .controls-panel .control-group {
-            margin-bottom: 15px;
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
         }
 
-        .controls-panel .control-group:last-child {
-            margin-bottom: 0;
-        }
-
-        .controls-panel .control-group label {
-            display: block;
-            margin-bottom: 8px;
+        .logo {
+            font-size: 1.5rem;
             font-weight: bold;
-            color: #CD7F32;
-            font-size: 14px;
+            color: var(--primary-color);
         }
 
-        .file-input {
-            display: none;
+        .header-actions {
+            display: flex;
+            gap: 15px;
         }
 
-        .file-label {
-            background: #CD7F32;
-            color: white !important;
-            padding: 12px 24px;
-            border-radius: 25px;
+        .header-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
             cursor: pointer;
-            font-weight: bold;
             transition: all 0.3s ease;
+            touch-action: manipulation;
         }
 
-        .file-label:hover {
+        .header-btn:hover {
+            background: var(--secondary-color);
             transform: translateY(-2px);
         }
 
-        .btn-music {
-            background: #CD7F32;
-            color: white !important;
-            font-size: 0.9em;
-            padding: 8px 16px;
+        /* 主要内容区域 */
+        .main-content {
+            margin-top: 80px;
+            padding: 20px;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
-        .btn-music:hover {
-            background: #B8860B;
+        /* 快速操作卡片 */
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
         }
 
-        .music-label {
-            background: #CD7F32;
-        }
-
-        .volume-slider {
-            width: 100px;
-            height: 6px;
-            border-radius: 3px;
-            background: #ddd;
-            outline: none;
-            -webkit-appearance: none;
-            margin: 0 10px;
-        }
-
-        .volume-slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            background: #ff6b6b;
+        .action-card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 25px 20px;
+            text-align: center;
             cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid var(--border-color);
+            touch-action: manipulation;
         }
 
-        .volume-slider::-moz-range-thumb {
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            background: #ff6b6b;
-            cursor: pointer;
-            border: none;
+        .action-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px var(--shadow-color);
+            border-color: var(--primary-color);
         }
 
-        #volumeDisplay {
+        .action-card .icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .action-card .title {
+            font-size: 1.1rem;
             font-weight: bold;
-            color: #CD7F32;
-            min-width: 40px;
-            display: inline-block;
+            margin-bottom: 8px;
         }
 
+        .action-card .description {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            line-height: 1.4;
+        }
+
+        /* 产品分类网格 */
+        .categories-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .category-card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            border: 1px solid var(--border-color);
+        }
+
+        .category-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px var(--shadow-color);
+        }
+
+        .category-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .category-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .category-count {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .category-items {
+            padding: 20px;
+        }
+
+        .category-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .category-item:last-child {
+            border-bottom: none;
+        }
+
+        .category-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            padding-left: 15px;
+        }
+
+
+
+        .item-info {
+            flex: 1;
+        }
+
+        .item-name {
+            font-weight: bold;
+            margin-bottom: 3px;
+        }
+
+        .item-description {
+            font-size: 0.85rem;
+            opacity: 0.7;
+        }
+
+        .play-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .play-btn:hover {
+            background: var(--secondary-color);
+            transform: scale(1.05);
+        }
+
+        /* 投屏控制面板 */
+        .cast-panel {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--card-bg);
+            border-top: 1px solid var(--border-color);
+            padding: 20px;
+            z-index: 1000;
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+            backdrop-filter: blur(20px);
+        }
+
+        .cast-panel.show {
+            transform: translateY(0);
+        }
+
+        .cast-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .cast-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .close-cast {
+            background: none;
+            border: none;
+            color: var(--text-color);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .cast-devices {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .cast-device {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            border-radius: 15px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .cast-device:hover {
+            border-color: var(--primary-color);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .cast-device.selected {
+            border-color: var(--primary-color);
+            background: rgba(205, 127, 50, 0.1);
+        }
+
+        .device-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .device-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .device-status {
+            font-size: 0.8rem;
+            opacity: 0.7;
+        }
+
+        .cast-controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .cast-control-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .cast-control-btn:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        .cast-control-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* 浮动投屏按钮 */
+        .float-cast-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 5px 20px var(--shadow-color);
+            transition: all 0.3s ease;
+            z-index: 999;
+        }
+
+        .float-cast-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 25px var(--shadow-color);
+        }
+
+        .float-cast-btn.casting {
+            background: var(--secondary-color);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        /* 响应式设计 */
         @media (max-width: 768px) {
-            .container {
-                padding: 20px;
-                margin: 10px;
+            .main-content {
+                padding: 15px;
             }
-            
-            .controls {
+
+            .quick-actions {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+            }
+
+            .categories-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .cast-panel {
+                padding: 15px;
+            }
+
+            .cast-devices {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .quick-actions {
+                grid-template-columns: 1fr;
+            }
+
+            .header-content {
                 flex-direction: column;
                 gap: 15px;
             }
-            
-            .image-container {
-                height: 400px;
+
+            .main-content {
+                margin-top: 120px;
             }
-            
-            h1 {
-                font-size: 2em;
+        }
+
+        /* 横屏模式优化 */
+        @media (orientation: landscape) and (max-height: 500px) {
+            .header {
+                padding: 10px 20px;
+            }
+
+            .main-content {
+                margin-top: 60px;
+            }
+
+            .float-cast-btn {
+                bottom: 20px;
+                right: 20px;
+                width: 50px;
+                height: 50px;
+                font-size: 1.2rem;
+            }
+        }
+
+        /* 触摸优化 */
+        @media (hover: none) and (pointer: coarse) {
+            .action-card,
+            .category-card,
+            .cast-device {
+                cursor: default;
+            }
+
+            .action-card:active,
+            .category-card:active,
+            .cast-device:active {
+                transform: scale(0.95);
             }
         }
     </style>
 </head>
 <body>
-            <div class="container">
-            <button class="toggle-controls" id="toggleControls" title="控制面板">⚙️</button>
-            <h1>🖼️ 图片滚动展示器</h1>
-        
-        <div class="image-container" id="imageContainer">
-            <img id="scrollingImage" class="scrolling-image" alt="滚动图片">
+    <!-- 顶部导航栏 -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">🎨 WHL窗帘</div>
+            <div class="header-actions">
+                <button class="header-btn" id="fullscreenBtn">⛶ 全屏</button>
+                <button class="header-btn" id="settingsBtn">⚙️ 设置</button>
+            </div>
         </div>
-        
-        <!-- 隐藏的音频播放器 -->
-        <audio id="backgroundMusic" preload="auto" loop>
-            您的浏览器不支持音频播放。
-        </audio>
-        
+    </header>
 
-        <div class="status" id="status">
-            状态: 准备就绪 - 请选择图片文件
+    <!-- 主要内容区域 -->
+    <main class="main-content">
+        <!-- 快速操作卡片 -->
+        <section class="quick-actions">
+            <div class="action-card" id="catalogCard">
+                <span class="icon">📚</span>
+                <div class="title">产品目录</div>
+                <div class="description">浏览所有窗帘布艺产品</div>
+            </div>
+            <div class="action-card" id="slideshowCard">
+                <span class="icon">🖼️</span>
+                <div class="title">幻灯片播放</div>
+                <div class="description">自动播放产品图片</div>
+            </div>
+            <div class="action-card" id="musicCard">
+                <span class="icon">🎵</span>
+                <div class="title">背景音乐</div>
+                <div class="description">播放舒缓背景音乐</div>
+            </div>
+            <div class="action-card" id="castCard">
+                <span class="icon">📺</span>
+                <div class="title">投屏播放</div>
+                <div class="description">投屏到电视大屏</div>
+            </div>
+        </section>
+
+        <!-- 产品分类网格 -->
+        <section class="categories-grid">
+            <!-- 纱帘系列 -->
+            <div class="category-card">
+                <div class="category-header">
+                    <div class="category-title">纱帘系列</div>
+                    <div class="category-count">8款产品</div>
+                </div>
+                <div class="category-items">
+                                         <div class="category-item" data-item="流光纱" data-image="Products/流光纱.JPG">
+                         <div class="item-info">
+                             <div class="item-name">流光纱</div>
+                             <div class="item-description">轻盈飘逸，如流水般柔美</div>
+                         </div>
+                         <button class="play-btn">播放</button>
+                     </div>
+                     <div class="category-item" data-item="窗纱" data-image="Products/窗纱.JPG">
+                         <div class="item-info">
+                             <div class="item-name">窗纱</div>
+                             <div class="item-description">经典简约，透光不透影</div>
+                         </div>
+                         <button class="play-btn">播放</button>
+                     </div>
+                     <div class="category-item" data-item="菱形纱" data-image="Products/菱形纱.JPG">
+                         <div class="item-info">
+                             <div class="item-name">菱形纱</div>
+                             <div class="item-description">几何图案，现代时尚</div>
+                         </div>
+                         <button class="play-btn">播放</button>
+                     </div>
+                     <div class="category-item" data-item="树纹纱" data-image="Products/树纹纱.JPG">
+                         <div class="item-info">
+                             <div class="item-name">树纹纱</div>
+                             <div class="item-description">自然纹理，清新雅致</div>
+                         </div>
+                         <button class="play-btn">播放</button>
+                     </div>
+                </div>
+            </div>
+
+            <!-- 布艺 植物/自然系列 -->
+            <div class="category-card">
+                <div class="category-header">
+                    <div class="category-title">植物/自然系列</div>
+                    <div class="category-count">7款产品</div>
+                </div>
+                <div class="category-items">
+                                         <div class="category-item" data-item="森镜林语-沉棕" data-image="Products/森镜林语-沉棕.JPG">
+                         <div class="item-info">
+                             <div class="item-name">森镜林语-沉棕</div>
+                             <div class="item-description">森林主题，深沉棕色</div>
+                         </div>
+                         <button class="play-btn">播放</button>
+                     </div>
+                     <div class="category-item" data-item="卵石海岸" data-image="Products/卵石海岸.JPG">
+                         <div class="item-info">
+                             <div class="item-name">卵石海岸</div>
+                             <div class="item-description">海岸风情，自然纹理</div>
+                         </div>
+                         <button class="play-btn">播放</button>
+                     </div>
+                     <div class="category-item" data-item="茹伊丛林" data-image="Products/茹伊丛林.JPG">
+                         <div class="item-info">
+                             <div class="item-name">茹伊丛林</div>
+                             <div class="item-description">丛林图案，野性魅力</div>
+                         </div>
+                         <button class="play-btn">播放</button>
+                     </div>
+                     <div class="category-item" data-item="半夏棉麻" data-image="Products/半夏棉麻.JPG">
+                         <div class="item-info">
+                             <div class="item-name">半夏棉麻</div>
+                             <div class="item-description">棉麻材质，自然舒适</div>
+                         </div>
+                         <button class="play-btn">播放</button>
+                     </div>
+                </div>
+            </div>
+
+            <!-- 布艺 花卉/浪漫系列 -->
+            <div class="category-card">
+                <div class="category-header">
+                    <div class="category-title">花卉/浪漫系列</div>
+                    <div class="category-count">4款产品</div>
+                </div>
+                <div class="category-items">
+                                         <div class="category-item" data-item="繁花-桃粉" data-image="Products/繁花-桃粉.JPG">
+                         <div class="item-info">
+                             <div class="item-name">繁花-桃粉</div>
+                             <div class="item-description">繁花似锦，桃粉浪漫</div>
+                         </div>
+                         <button class="play-btn">播放</button>
+                     </div>
+                     <div class="category-item" data-item="翠微竹韵-金缎" data-image="Products/翠微竹韵-金缎.JPG">
+                         <div class="item-info">
+                             <div class="item-name">翠微竹韵-金缎</div>
+                             <div class="item-description">竹韵清雅，金缎华贵</div>
+                         </div>
+                         <button class="play-btn">播放</button>
+                     </div>
+                     <div class="category-item" data-item="翠微竹韵-银雾" data-image="Products/翠微竹韵-银雾.JPG">
+                         <div class="item-info">
+                             <div class="item-name">翠微竹韵-银雾</div>
+                             <div class="item-description">竹韵清雅，银雾朦胧</div>
+                         </div>
+                         <button class="play-btn">播放</button>
+                     </div>
+                     <div class="category-item" data-item="风沙流影" data-image="Products/风沙流影.JPG">
+                         <div class="item-info">
+                             <div class="item-name">风沙流影</div>
+                             <div class="item-description">风沙纹理，流动美感</div>
+                         </div>
+                         <button class="play-btn">播放</button>
+                     </div>
+                </div>
+            </div>
+
+            <!-- 布艺 欧式/典雅系列 -->
+            <div class="category-card">
+                <div class="category-header">
+                    <div class="category-title">欧式/典雅系列</div>
+                    <div class="category-count">5款产品</div>
+                </div>
+                <div class="category-items">
+                                         <div class="category-item" data-item="凡尔赛-雾灰" data-image="Products/凡尔赛-雾灰.JPG">
+                         <div class="item-info">
+                             <div class="item-name">凡尔赛-雾灰</div>
+                             <div class="item-description">凡尔赛风格，雾灰典雅</div>
+                         </div>
+                         <button class="play-btn">播放</button>
+                     </div>
+                     <div class="category-item" data-item="弗特伊-雾灰" data-image="Products/弗特伊-雾灰.JPG">
+                         <div class="item-info">
+                             <div class="item-name">弗特伊-雾灰</div>
+                             <div class="item-description">弗特伊风格，雾灰沉稳</div>
+                         </div>
+                         <button class="play-btn">播放</button>
+                     </div>
+                     <div class="category-item" data-item="弗特伊-暮金" data-image="Products/弗特伊-暮金.JPG">
+                         <div class="item-info">
+                             <div class="item-name">弗特伊-暮金</div>
+                             <div class="item-description">弗特伊风格，暮金华贵</div>
+                         </div>
+                         <button class="play-btn">播放</button>
+                     </div>
+                     <div class="category-item" data-item="枝叶绣-雾蓝" data-image="Products/枝叶绣-雾蓝.JPG">
+                         <div class="item-info">
+                             <div class="item-name">枝叶绣-雾蓝</div>
+                             <div class="item-description">枝叶刺绣，雾蓝清新</div>
+                         </div>
+                         <button class="play-btn">播放</button>
+                     </div>
+                </div>
+            </div>
+
+            <!-- 高端布艺 -->
+            <div class="category-card">
+                <div class="category-header">
+                    <div class="category-title">高端布艺</div>
+                    <div class="category-count">4款产品</div>
+                </div>
+                <div class="category-items">
+                                         <div class="category-item" data-item="米洛缇" data-image="Products/米洛缇.JPG">
+                         <div class="item-info">
+                             <div class="item-name">米洛缇</div>
+                             <div class="item-description">高端品牌，奢华品质</div>
+                         </div>
+                         <button class="play-btn">播放</button>
+                     </div>
+                     <div class="category-item" data-item="香榭丽" data-image="Products/香榭丽.JPG">
+                         <div class="item-info">
+                             <div class="item-name">香榭丽</div>
+                             <div class="item-description">法国风情，浪漫奢华</div>
+                         </div>
+                         <button class="play-btn">播放</button>
+                     </div>
+                     <div class="category-item" data-item="幕洛编织麻" data-image="Products/幕洛编织麻.JPG">
+                         <div class="item-info">
+                             <div class="item-name">幕洛编织麻</div>
+                             <div class="item-description">编织工艺，自然质感</div>
+                         </div>
+                         <button class="play-btn">播放</button>
+                     </div>
+                     <div class="category-item" data-item="美丽奴" data-image="Products/美丽奴.JPG">
+                         <div class="item-info">
+                             <div class="item-name">美丽奴</div>
+                             <div class="item-description">优质材质，舒适体验</div>
+                         </div>
+                         <button class="play-btn">播放</button>
+                     </div>
+                </div>
+            </div>
+
+            <!-- 遮阳帘 -->
+            <div class="category-card">
+                <div class="category-header">
+                    <div class="category-title">遮阳帘</div>
+                    <div class="category-count">5款产品</div>
+                </div>
+                <div class="category-items">
+                                         <div class="category-item" data-item="罗马帘" data-image="Products/罗马帘.JPG">
+                         <div class="item-info">
+                             <div class="item-name">罗马帘</div>
+                             <div class="item-description">经典罗马风格，优雅大方</div>
+                         </div>
+                         <button class="play-btn">播放</button>
+                     </div>
+                     <div class="category-item" data-item="斑马帘" data-image="Products/斑马帘.JPG">
+                         <div class="item-info">
+                             <div class="item-name">斑马帘</div>
+                             <div class="item-description">斑马条纹，时尚现代</div>
+                         </div>
+                         <button class="play-btn">播放</button>
+                     </div>
+                     <div class="category-item" data-item="梦幻帘" data-image="Products/梦幻帘.JPG">
+                         <div class="item-info">
+                             <div class="item-name">梦幻帘</div>
+                             <div class="item-description">梦幻效果，浪漫唯美</div>
+                         </div>
+                         <button class="play-btn">播放</button>
+                     </div>
+                     <div class="category-item" data-item="蜂巢帘" data-image="Products/蜂巢帘.JPG">
+                         <div class="item-info">
+                             <div class="item-name">蜂巢帘</div>
+                             <div class="item-description">蜂巢结构，隔热保温</div>
+                         </div>
+                         <button class="play-btn">播放</button>
+                     </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 浮动投屏按钮 -->
+    <button class="float-cast-btn" id="floatCastBtn" title="投屏到电视">📺</button>
+
+    <!-- 投屏控制面板 -->
+    <div class="cast-panel" id="castPanel">
+        <div class="cast-header">
+            <div class="cast-title">📺 投屏控制</div>
+            <button class="close-cast" id="closeCastBtn">×</button>
         </div>
         
-        <!-- 控制面板 -->
-        <div class="controls-panel" id="controlsPanel" style="display: none;">
-            <div class="control-group">
-                <label for="speedSlider">滚动速度</label>
-                <input type="range" id="speedSlider" class="speed-slider" min="1" max="20" value="1">
-                <div class="speed-display" id="speedDisplay">1</div>
+        <div class="cast-devices" id="castDevices">
+            <div class="cast-device" data-device="tv">
+                <span class="device-icon">📺</span>
+                <div class="device-name">智能电视</div>
+                <div class="device-status">等待连接...</div>
             </div>
-            
-            <div class="control-group">
-                <label>控制按钮</label>
-                <div style="display: flex; gap: 10px;">
-                    <button id="playBtn" class="btn btn-primary">▶️ 播放</button>
-                    <button id="pauseBtn" class="btn btn-secondary">⏸️ 暂停</button>
-                    <button id="resetBtn" class="btn btn-success">🔄 重置</button>
-                </div>
+            <div class="cast-device" data-device="projector">
+                <span class="device-icon">🎥</span>
+                <div class="device-name">投影仪</div>
+                <div class="device-status">等待连接...</div>
             </div>
-            
-            <div class="control-group">
-                <label>选择图片</label>
-                <input type="file" id="fileInput" class="file-input" accept="image/*">
-                <label for="fileInput" class="file-label">📁 选择图片</label>
+            <div class="cast-device" data-device="monitor">
+                <span class="device-icon">🖥️</span>
+                <div class="device-name">显示器</div>
+                <div class="device-status">等待连接...</div>
             </div>
-            
-            <div class="control-group">
-                <label>背景音乐</label>
-                <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
-                    <input type="file" id="musicInput" class="file-input" accept="audio/*">
-                    <label for="musicInput" class="file-label music-label">🎵 选择音乐</label>
-                    <button id="musicPlayBtn" class="btn btn-music">▶️ 播放音乐</button>
-                    <button id="musicPauseBtn" class="btn btn-music">⏸️ 暂停音乐</button>
-                    <button id="musicStopBtn" class="btn btn-music">⏹️ 停止音乐</button>
-                </div>
-                <div style="margin-top: 10px;">
-                    <label for="volumeSlider">音量</label>
-                    <input type="range" id="volumeSlider" class="volume-slider" min="0" max="100" value="50">
-                    <span id="volumeDisplay">50%</span>
-                </div>
-            </div>
+        </div>
+        
+        <div class="cast-controls">
+            <button class="cast-control-btn" id="startCastBtn">开始投屏</button>
+            <button class="cast-control-btn" id="stopCastBtn" disabled>停止投屏</button>
         </div>
     </div>
 
     <script>
-        class ImageScroller {
+        // 移动端应用主类
+        class MobileApp {
             constructor() {
-                this.image = document.getElementById('scrollingImage');
-                this.container = document.getElementById('imageContainer');
-                this.speedSlider = document.getElementById('speedSlider');
-                this.speedDisplay = document.getElementById('speedDisplay');
-                this.playBtn = document.getElementById('playBtn');
-                this.pauseBtn = document.getElementById('pauseBtn');
-                this.resetBtn = document.getElementById('resetBtn');
-                this.fileInput = document.getElementById('fileInput');
-                this.status = document.getElementById('status');
-                
-                // 音乐控制元素
-                this.musicInput = document.getElementById('musicInput');
-                this.musicPlayBtn = document.getElementById('musicPlayBtn');
-                this.musicPauseBtn = document.getElementById('musicPauseBtn');
-                this.musicStopBtn = document.getElementById('musicStopBtn');
-                this.volumeSlider = document.getElementById('volumeSlider');
-                this.volumeDisplay = document.getElementById('volumeDisplay');
-                this.backgroundMusic = document.getElementById('backgroundMusic');
-                
-                this.isPlaying = false;
-                this.currentPosition = 0;
-                this.animationId = null;
-                this.speed = 1;
-                this.direction = 1; // 1 for down, -1 for up
-                
-                // 音乐状态
-                this.isMusicPlaying = false;
-                this.currentMusicFile = null;
-                
-                // 拖拽状态
-                this.isDragging = false;
-                this.startY = 0;
-                this.startPosition = 0;
-                this.lastY = 0;
-                this.velocity = 0;
-                this.lastTime = 0;
-                
+                this.isCasting = false;
+                this.selectedDevice = null;
+                this.castStream = null;
                 this.init();
             }
-            
+
             init() {
                 this.bindEvents();
-                this.updateSpeed();
-                
-                // 尝试加载默认图片
-                this.loadDefaultImage();
+                this.checkCastSupport();
+                this.setupTouchGestures();
             }
-            
+
             bindEvents() {
-                this.speedSlider.addEventListener('input', () => this.updateSpeed());
-                this.playBtn.addEventListener('click', () => this.play());
-                this.pauseBtn.addEventListener('click', () => this.pause());
-                this.resetBtn.addEventListener('click', () => this.reset());
-                this.fileInput.addEventListener('change', (e) => this.handleFileSelect(e));
-                
-                // 音乐控制事件
-                this.musicInput.addEventListener('change', (e) => this.handleMusicSelect(e));
-                this.musicPlayBtn.addEventListener('click', () => this.playMusic());
-                this.musicPauseBtn.addEventListener('click', () => this.pauseMusic());
-                this.musicStopBtn.addEventListener('click', () => this.stopMusic());
-                this.volumeSlider.addEventListener('input', () => this.updateVolume());
-                
-                // 拖拽事件
-                this.image.addEventListener('mousedown', (e) => this.startDrag(e));
-                this.image.addEventListener('mousemove', (e) => this.drag(e));
-                this.image.addEventListener('mouseup', (e) => this.endDrag(e));
-                this.image.addEventListener('mouseleave', (e) => this.endDrag(e));
-                
-                // 触摸事件支持
-                this.image.addEventListener('touchstart', (e) => this.startTouch(e));
-                this.image.addEventListener('touchmove', (e) => this.touchMove(e));
-                this.image.addEventListener('touchend', (e) => this.endTouch(e));
-                
-                // 点击图片切换方向（需要区分拖拽和点击）
-                this.image.addEventListener('click', (e) => this.handleImageClick(e));
-                
-                // 控制面板切换
-                document.getElementById('toggleControls').addEventListener('click', () => this.toggleControlsPanel());
-            }
-            
-            async loadDefaultImage() {
-                try {
-                    // 尝试加载用户指定的图片路径
-                    const defaultImagePath = 'C:\\Users\\Whalew\\Downloads\\IMG_6380.JPG';
-                    // 注意：由于浏览器安全限制，无法直接访问本地文件系统
-                    // 这里会显示提示信息
-                    this.status.textContent = '状态: 请使用"选择图片"按钮选择图片文件';
-                } catch (error) {
-                    this.status.textContent = '状态: 请选择图片文件';
-                }
-            }
-            
-            handleFileSelect(event) {
-                const file = event.target.files[0];
-                if (file && file.type.startsWith('image/')) {
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                        this.image.src = e.target.result;
-                        this.status.textContent = '状态: 图片已加载，点击播放开始滚动';
-                        this.reset();
-                    };
-                    reader.readAsDataURL(file);
-                } else {
-                    this.status.textContent = '状态: 请选择有效的图片文件';
-                }
-            }
-            
-            updateSpeed() {
-                this.speed = parseInt(this.speedSlider.value);
-                this.speedDisplay.textContent = this.speed;
-                
-                if (this.isPlaying) {
-                    this.pause();
-                    this.play();
-                }
-            }
-            
-            play() {
-                if (!this.image.src || this.image.src === 'data:') {
-                    this.status.textContent = '状态: 请先选择图片文件';
-                    return;
-                }
-                
-                this.isPlaying = true;
-                this.playBtn.disabled = true;
-                this.pauseBtn.disabled = false;
-                this.status.textContent = `状态: 正在播放 - 速度: ${this.speed}`;
-                
-                this.animate();
-                
-                // 播放时隐藏状态栏
-                setTimeout(() => {
-                    this.status.classList.add('hidden');
-                }, 2000);
-            }
-            
-            pause() {
-                this.isPlaying = false;
-                this.playBtn.disabled = false;
-                this.pauseBtn.disabled = true;
-                this.status.textContent = '状态: 已暂停';
-                this.status.classList.remove('hidden');
-                
-                if (this.animationId) {
-                    cancelAnimationFrame(this.animationId);
-                    this.animationId = null;
-                }
-            }
-            
-            reset() {
-                this.pause();
-                this.currentPosition = 0;
-                this.direction = 1;
-                this.image.style.transform = 'translateY(0px)';
-                this.status.textContent = '状态: 已重置到起始位置';
-                this.status.classList.remove('hidden');
-            }
-            
-            toggleDirection() {
-                this.direction *= -1;
-                const directionText = this.direction === 1 ? '向下' : '向上';
-                this.status.textContent = `状态: 滚动方向已切换为${directionText}`;
-            }
-            
-            // 拖拽相关方法
-            startDrag(event) {
-                event.preventDefault();
-                this.isDragging = true;
-                this.startY = event.clientY;
-                this.startPosition = this.currentPosition;
-                this.lastY = this.startY;
-                this.lastTime = Date.now();
-                this.velocity = 0;
-                
-                // 暂停自动播放
-                if (this.isPlaying) {
-                    this.pause();
-                }
-                
-                this.status.textContent = '状态: 拖拽中 - 可上下拖动图片';
-            }
-            
-            drag(event) {
-                if (!this.isDragging) return;
-                
-                event.preventDefault();
-                const currentY = event.clientY;
-                const deltaY = this.startY - currentY;
-                const newPosition = this.startPosition + deltaY;
-                
-                // 限制拖拽范围
-                const containerHeight = this.container.clientHeight;
-                const imageHeight = this.image.naturalHeight;
-                const maxScroll = Math.max(0, imageHeight - containerHeight);
-                
-                if (maxScroll > 0) {
-                    this.currentPosition = Math.max(0, Math.min(maxScroll, newPosition));
-                    this.image.style.transform = `translateY(-${this.currentPosition}px)`;
-                }
-                
-                // 计算速度
-                const currentTime = Date.now();
-                const timeDelta = currentTime - this.lastTime;
-                if (timeDelta > 0) {
-                    this.velocity = (this.lastY - currentY) / timeDelta;
-                }
-                this.lastY = currentY;
-                this.lastTime = currentTime;
-            }
-            
-            endDrag(event) {
-                if (!this.isDragging) return;
-                
-                this.isDragging = false;
-                
-                // 应用惯性滚动
-                if (Math.abs(this.velocity) > 0.5) {
-                    this.applyInertia();
-                } else {
-                    this.status.textContent = '状态: 拖拽结束';
-                }
-            }
-            
-            // 触摸事件支持
-            startTouch(event) {
-                event.preventDefault();
-                const touch = event.touches[0];
-                this.isDragging = true;
-                this.startY = touch.clientY;
-                this.startPosition = this.currentPosition;
-                this.lastY = this.startY;
-                this.lastTime = Date.now();
-                this.velocity = 0;
-                
-                // 暂停自动播放
-                if (this.isPlaying) {
-                    this.pause();
-                }
-                
-                this.status.textContent = '状态: 触摸拖拽中';
-            }
-            
-            touchMove(event) {
-                if (!this.isDragging) return;
-                
-                event.preventDefault();
-                const touch = event.touches[0];
-                const currentY = touch.clientY;
-                const deltaY = this.startY - currentY;
-                const newPosition = this.startPosition + deltaY;
-                
-                // 限制拖拽范围
-                const containerHeight = this.container.clientHeight;
-                const imageHeight = this.image.naturalHeight;
-                const maxScroll = Math.max(0, imageHeight - containerHeight);
-                
-                if (maxScroll > 0) {
-                    this.currentPosition = Math.max(0, Math.min(maxScroll, newPosition));
-                    this.image.style.transform = `translateY(-${this.currentPosition}px)`;
-                }
-                
-                // 计算速度
-                const currentTime = Date.now();
-                const timeDelta = currentTime - this.lastTime;
-                if (timeDelta > 0) {
-                    this.velocity = (this.lastY - currentY) / timeDelta;
-                }
-                this.lastY = currentY;
-                this.lastTime = currentTime;
-            }
-            
-            endTouch(event) {
-                if (!this.isDragging) return;
-                
-                this.isDragging = false;
-                
-                // 应用惯性滚动
-                if (Math.abs(this.velocity) > 0.5) {
-                    this.applyInertia();
-                } else {
-                    this.status.textContent = '状态: 触摸拖拽结束';
-                }
-            }
-            
-            // 惯性滚动
-            applyInertia() {
-                const friction = 0.95;
-                const animate = () => {
-                    if (Math.abs(this.velocity) < 0.1) {
-                        this.status.textContent = '状态: 惯性滚动结束';
-                        return;
-                    }
-                    
-                    this.velocity *= friction;
-                    this.currentPosition += this.velocity * 16; // 16ms per frame
-                    
-                    // 限制范围
-                    const containerHeight = this.container.clientHeight;
-                    const imageHeight = this.image.naturalHeight;
-                    const maxScroll = Math.max(0, imageHeight - containerHeight);
-                    
-                    if (this.currentPosition < 0) {
-                        this.currentPosition = 0;
-                        this.velocity = 0;
-                    } else if (this.currentPosition > maxScroll) {
-                        this.currentPosition = maxScroll;
-                        this.velocity = 0;
-                    }
-                    
-                    this.image.style.transform = `translateY(-${this.currentPosition}px)`;
-                    requestAnimationFrame(animate);
-                };
-                
-                animate();
-            }
-            
-            // 处理图片点击（区分拖拽和点击）
-            handleImageClick(event) {
-                // 如果拖拽距离很小，认为是点击
-                const dragDistance = Math.abs(event.clientY - this.startY);
-                if (dragDistance < 5 && !this.isDragging) {
-                    this.toggleDirection();
-                }
-            }
-            
-            // 音乐控制方法
-            handleMusicSelect(event) {
-                const file = event.target.files[0];
-                if (file && file.type.startsWith('audio/')) {
-                    this.currentMusicFile = file;
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                        this.backgroundMusic.src = e.target.result;
-                        this.status.textContent = `状态: 音乐已加载 - ${file.name}`;
-                        this.musicPlayBtn.disabled = false;
-                        this.musicPauseBtn.disabled = true;
-                        this.musicStopBtn.disabled = true;
-                    };
-                    reader.readAsDataURL(file);
-                } else {
-                    this.status.textContent = '状态: 请选择有效的音频文件';
-                }
-            }
-            
-            playMusic() {
-                if (!this.backgroundMusic.src || this.backgroundMusic.src === 'data:') {
-                    this.status.textContent = '状态: 请先选择音乐文件';
-                    return;
-                }
-                
-                this.backgroundMusic.play().then(() => {
-                    this.isMusicPlaying = true;
-                    this.musicPlayBtn.disabled = true;
-                    this.musicPauseBtn.disabled = false;
-                    this.musicStopBtn.disabled = false;
-                    this.status.textContent = '状态: 音乐正在播放';
-                }).catch(error => {
-                    this.status.textContent = '状态: 音乐播放失败 - ' + error.message;
+                // 快速操作卡片事件
+                document.getElementById('catalogCard').addEventListener('click', () => {
+                    this.showCatalog();
+                });
+
+                document.getElementById('slideshowCard').addEventListener('click', () => {
+                    this.startSlideshow();
+                });
+
+                document.getElementById('musicCard').addEventListener('click', () => {
+                    this.toggleMusic();
+                });
+
+                document.getElementById('castCard').addEventListener('click', () => {
+                    this.showCastPanel();
+                });
+
+                // 投屏相关事件
+                document.getElementById('floatCastBtn').addEventListener('click', () => {
+                    this.showCastPanel();
+                });
+
+                document.getElementById('closeCastBtn').addEventListener('click', () => {
+                    this.hideCastPanel();
+                });
+
+                document.getElementById('startCastBtn').addEventListener('click', () => {
+                    this.startCasting();
+                });
+
+                document.getElementById('stopCastBtn').addEventListener('click', () => {
+                    this.stopCasting();
+                });
+
+                // 投屏设备选择
+                document.querySelectorAll('.cast-device').forEach(device => {
+                    device.addEventListener('click', () => {
+                        this.selectDevice(device);
+                    });
+                });
+
+                // 产品播放事件
+                document.querySelectorAll('.play-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const item = btn.closest('.category-item');
+                        const itemName = item.dataset.item;
+                        const imagePath = item.dataset.image;
+                        this.playItem(itemName, imagePath);
+                    });
+                });
+
+                // 头部按钮事件
+                document.getElementById('fullscreenBtn').addEventListener('click', () => {
+                    this.toggleFullscreen();
+                });
+
+                document.getElementById('settingsBtn').addEventListener('click', () => {
+                    this.showSettings();
                 });
             }
-            
-            pauseMusic() {
-                this.backgroundMusic.pause();
-                this.isMusicPlaying = false;
-                this.musicPlayBtn.disabled = false;
-                this.musicPauseBtn.disabled = true;
-                this.musicStopBtn.disabled = false;
-                this.status.textContent = '状态: 音乐已暂停';
+
+            // 显示产品目录
+            showCatalog() {
+                window.location.href = 'catalog.html';
             }
-            
-            stopMusic() {
-                this.backgroundMusic.pause();
-                this.backgroundMusic.currentTime = 0;
-                this.isMusicPlaying = false;
-                this.musicPlayBtn.disabled = false;
-                this.musicPauseBtn.disabled = true;
-                this.musicStopBtn.disabled = true;
-                this.status.textContent = '状态: 音乐已停止';
+
+            // 开始幻灯片播放
+            startSlideshow() {
+                // 获取所有产品，创建播放队列
+                const allItems = [];
+                document.querySelectorAll('.category-item').forEach(item => {
+                    allItems.push({
+                        name: item.dataset.item,
+                        image: item.dataset.image
+                    });
+                });
+
+                // 跳转到全屏播放页面
+                const playQueue = encodeURIComponent(JSON.stringify(allItems));
+                window.location.href = `fullscreen.html?mode=slideshow&queue=${playQueue}`;
             }
-            
-            updateVolume() {
-                const volume = this.volumeSlider.value / 100;
-                this.backgroundMusic.volume = volume;
-                this.volumeDisplay.textContent = this.volumeSlider.value + '%';
+
+            // 切换音乐播放
+            toggleMusic() {
+                // 跳转到音乐播放页面
+                window.location.href = 'music-player.html';
             }
-            
-            toggleControlsPanel() {
-                const controlsPanel = document.getElementById('controlsPanel');
-                const isVisible = controlsPanel.style.display !== 'none';
-                controlsPanel.style.display = isVisible ? 'none' : 'block';
-                
-                const toggleBtn = document.getElementById('toggleControls');
-                toggleBtn.title = isVisible ? '显示控制面板' : '隐藏控制面板';
+
+            // 显示投屏面板
+            showCastPanel() {
+                document.getElementById('castPanel').classList.add('show');
             }
-            
-            animate() {
-                if (!this.isPlaying) return;
-                
-                const containerHeight = this.container.clientHeight;
-                const imageHeight = this.image.naturalHeight;
-                const maxScroll = Math.max(0, imageHeight - containerHeight);
-                
-                if (maxScroll > 0) {
-                    this.currentPosition += this.direction * this.speed;
-                    
-                    // 循环滚动
-                    if (this.currentPosition >= maxScroll) {
-                        this.currentPosition = 0;
-                    } else if (this.currentPosition <= 0) {
-                        this.currentPosition = maxScroll;
-                    }
-                    
-                    this.image.style.transform = `translateY(-${this.currentPosition}px)`;
+
+            // 隐藏投屏面板
+            hideCastPanel() {
+                document.getElementById('castPanel').classList.remove('show');
+            }
+
+            // 选择投屏设备
+            selectDevice(deviceElement) {
+                // 移除之前的选择
+                document.querySelectorAll('.cast-device').forEach(d => {
+                    d.classList.remove('selected');
+                });
+
+                // 选择当前设备
+                deviceElement.classList.add('selected');
+                this.selectedDevice = deviceElement.dataset.device;
+
+                // 更新设备状态
+                const statusElement = deviceElement.querySelector('.device-status');
+                statusElement.textContent = '已选择';
+                statusElement.style.color = '#CD7F32';
+
+                // 启用开始投屏按钮
+                document.getElementById('startCastBtn').disabled = false;
+            }
+
+            // 检查投屏支持
+            checkCastSupport() {
+                if (navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia) {
+                    console.log('支持屏幕共享投屏');
+                } else if (window.chrome && window.chrome.cast && window.chrome.cast.isAvailable) {
+                    console.log('支持Chrome Cast投屏');
+                } else {
+                    console.log('不支持投屏功能');
+                    // 隐藏投屏相关按钮
+                    document.getElementById('castCard').style.display = 'none';
+                    document.getElementById('floatCastBtn').style.display = 'none';
                 }
-                
-                this.animationId = requestAnimationFrame(() => this.animate());
+            }
+
+            // 开始投屏
+            async startCasting() {
+                if (!this.selectedDevice) {
+                    alert('请先选择投屏设备');
+                    return;
+                }
+
+                try {
+                    // 使用屏幕共享API
+                    const stream = await navigator.mediaDevices.getDisplayMedia({
+                        video: {
+                            cursor: 'never'
+                        },
+                        audio: false
+                    });
+
+                    this.castStream = stream;
+                    this.isCasting = true;
+
+                    // 更新UI状态
+                    document.getElementById('floatCastBtn').classList.add('casting');
+                    document.getElementById('startCastBtn').disabled = true;
+                    document.getElementById('stopCastBtn').disabled = false;
+
+                    // 更新设备状态
+                    const selectedDeviceElement = document.querySelector(`[data-device="${this.selectedDevice}"]`);
+                    const statusElement = selectedDeviceElement.querySelector('.device-status');
+                    statusElement.textContent = '投屏中...';
+                    statusElement.style.color = '#4CAF50';
+
+                    // 监听流结束
+                    stream.getVideoTracks()[0].addEventListener('ended', () => {
+                        this.stopCasting();
+                    });
+
+                    console.log('投屏开始');
+                    this.showToast('投屏已开始');
+
+                } catch (error) {
+                    console.error('投屏失败:', error);
+                    this.showToast('投屏失败: ' + error.message);
+                }
+            }
+
+            // 停止投屏
+            stopCasting() {
+                if (this.castStream) {
+                    this.castStream.getTracks().forEach(track => track.stop());
+                    this.castStream = null;
+                }
+
+                this.isCasting = false;
+
+                // 更新UI状态
+                document.getElementById('floatCastBtn').classList.remove('casting');
+                document.getElementById('startCastBtn').disabled = false;
+                document.getElementById('stopCastBtn').disabled = true;
+
+                // 重置设备状态
+                document.querySelectorAll('.cast-device').forEach(device => {
+                    const statusElement = device.querySelector('.device-status');
+                    statusElement.textContent = '等待连接...';
+                    statusElement.style.color = '';
+                });
+
+                // 移除设备选择
+                document.querySelectorAll('.cast-device').forEach(d => {
+                    d.classList.remove('selected');
+                });
+                this.selectedDevice = null;
+
+                console.log('投屏停止');
+                this.showToast('投屏已停止');
+            }
+
+            // 播放单个产品
+            playItem(itemName, imagePath) {
+                // 跳转到播放页面
+                const params = new URLSearchParams({
+                    item: itemName,
+                    image: imagePath
+                });
+                window.location.href = `fullscreen.html?${params.toString()}`;
+            }
+
+            // 切换全屏
+            toggleFullscreen() {
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen().catch(err => {
+                        console.log('全屏请求被拒绝:', err);
+                    });
+                } else {
+                    document.exitFullscreen();
+                }
+            }
+
+            // 显示设置
+            showSettings() {
+                // 显示设置面板
+                this.showToast('设置功能开发中...');
+            }
+
+            // 设置触摸手势
+            setupTouchGestures() {
+                let startY = 0;
+                let startTime = 0;
+
+                // 监听触摸开始
+                document.addEventListener('touchstart', (e) => {
+                    startY = e.touches[0].clientY;
+                    startTime = Date.now();
+                });
+
+                // 监听触摸结束
+                document.addEventListener('touchend', (e) => {
+                    const endY = e.changedTouches[0].clientY;
+                    const endTime = Date.now();
+                    const deltaY = endY - startY;
+                    const deltaTime = endTime - startTime;
+
+                    // 快速上滑 - 显示投屏面板
+                    if (deltaY < -100 && deltaTime < 300) {
+                        this.showCastPanel();
+                    }
+
+                    // 快速下滑 - 隐藏投屏面板
+                    if (deltaY > 100 && deltaTime < 300) {
+                        this.hideCastPanel();
+                    }
+                });
+            }
+
+            // 显示提示消息
+            showToast(message) {
+                // 创建提示元素
+                const toast = document.createElement('div');
+                toast.style.cssText = `
+                    position: fixed;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    background: rgba(0, 0, 0, 0.9);
+                    color: white;
+                    padding: 15px 25px;
+                    border-radius: 25px;
+                    z-index: 10000;
+                    font-size: 1rem;
+                    backdrop-filter: blur(10px);
+                `;
+                toast.textContent = message;
+                document.body.appendChild(toast);
+
+                // 3秒后自动移除
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.remove();
+                    }
+                }, 3000);
             }
         }
-        
-        // 初始化应用
-        document.addEventListener('DOMContentLoaded', () => {
-            new ImageScroller();
-        });
-        
 
+        // 页面加载完成后初始化应用
+        document.addEventListener('DOMContentLoaded', () => {
+            new MobileApp();
+        });
+
+        // 注册Service Worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js')
+                .then(registration => {
+                    console.log('Service Worker注册成功:', registration);
+                })
+                .catch(error => {
+                    console.error('Service Worker注册失败:', error);
+                });
+        }
     </script>
 </body>
 </html>
