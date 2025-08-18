@@ -1,0 +1,1649 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>全屏图片滚动展示器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        /* 确保所有文字都是铜色 */
+        body, h1, h2, h3, p, span, div, label, button {
+            color: #CD7F32 !important;
+        }
+
+        body {
+            background: #000;
+            overflow: hidden;
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+        }
+
+        .image-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .scrolling-image {
+            position: absolute;
+            width: 100%;
+            height: auto;
+            object-fit: cover;
+            transition: transform 0.3s ease-out;
+            cursor: grab;
+            opacity: 0;
+            transform: scale(0.95);
+        }
+
+        .scrolling-image.loaded {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .scrolling-image:active {
+            cursor: grabbing;
+        }
+
+        /* 图片加载动画 */
+        .image-loading {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(205, 127, 50, 0.3);
+            border-top: 4px solid #CD7F32;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            z-index: 1001;
+        }
+
+        @keyframes spin {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        /* 播放进度条 */
+        .progress-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #CD7F32, #B8860B);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        /* 播放状态指示器 */
+        .play-status {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: #CD7F32;
+            padding: 20px 40px;
+            border-radius: 25px;
+            font-size: 1.2em;
+            font-weight: bold;
+            z-index: 1002;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .play-status.show {
+            opacity: 1;
+        }
+
+        .play-status.success {
+            background: rgba(0, 128, 0, 0.9);
+            color: white;
+        }
+
+        .play-status.error {
+            background: rgba(255, 0, 0, 0.9);
+            color: white;
+        }
+
+        .play-status.info {
+            background: rgba(0, 123, 255, 0.9);
+            color: white;
+        }
+
+        /* 全屏状态指示器 */
+        .fullscreen-indicator {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: #CD7F32;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            z-index: 1003;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .fullscreen-indicator.show {
+            opacity: 1;
+        }
+
+        .fullscreen-indicator.fullscreen {
+            background: rgba(0, 128, 0, 0.9);
+            color: white;
+        }
+
+        /* 触摸设备优化 */
+        @media (hover: none) and (pointer: coarse) {
+            .controls {
+                padding: 25px;
+            }
+            
+            .btn {
+                padding: 12px 20px;
+                font-size: 14px;
+                margin: 5px;
+            }
+            
+            .speed-slider {
+                width: 150px;
+                height: 8px;
+            }
+            
+            .volume-slider {
+                width: 100px;
+                height: 6px;
+            }
+        }
+
+        .image-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        .controls {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 15px;
+            padding: 20px;
+            color: white;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: opacity 0.3s ease;
+        }
+
+        .controls:hover {
+            opacity: 1;
+        }
+
+        .controls.hidden {
+            opacity: 0.3;
+        }
+
+        .control-group {
+            margin-bottom: 15px;
+        }
+
+        .control-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .control-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #CD7F32;
+        }
+
+        .speed-slider {
+            width: 120px;
+            height: 6px;
+            border-radius: 3px;
+            background: #333;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .speed-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #fff;
+            cursor: pointer;
+        }
+
+        .speed-slider::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #fff;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 2px;
+            transition: all 0.2s ease;
+            background: white;
+            color: #CD7F32 !important;
+        }
+
+        .btn:hover {
+            background: #f0f0f0;
+            transform: scale(1.05);
+        }
+
+        .btn.active {
+            background: #e8e8e8;
+        }
+
+        .speed-display {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 10px;
+            font-size: 12px;
+            text-align: center;
+            min-width: 40px;
+            display: inline-block;
+        }
+
+
+
+        .status {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            z-index: 1000;
+            transition: opacity 0.3s ease;
+        }
+        
+        .status.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .toggle-controls {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: #CD7F32;
+            color: white !important;
+            padding:12px;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            z-index: 1001;
+            backdrop-filter: blur(10px);
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-controls:hover {
+            background: #B8860B;
+            transform: scale(1.1);
+        }
+
+        .instructions {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            z-index: 999;
+            max-width: 400px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .instructions h2 {
+            margin-bottom: 20px;
+            color: #CD7F32;
+        }
+
+        .instructions p {
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+
+        .close-instructions {
+            background: white;
+            color: #CD7F32 !important;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 15px;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+
+        .close-instructions:hover {
+            background: #f0f0f0;
+        }
+
+        .btn-music {
+            background: white;
+            color: #CD7F32 !important;
+            font-size: 10px;
+            padding: 6px 12px;
+            min-width: 30px;
+        }
+
+        .btn-music:hover {
+            background: #f0f0f0;
+        }
+
+        .btn-return {
+            background: white !important;
+            color: #CD7F32 !important;
+        }
+
+        .btn-return:hover {
+            background: #f0f0f0 !important;
+            transform: scale(1.05);
+        }
+
+
+
+        .volume-slider {
+            width: 80px;
+            height: 4px;
+            border-radius: 2px;
+            background: #333;
+            outline: none;
+            -webkit-appearance: none;
+            margin: 0 8px;
+        }
+
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #ff6b6b;
+            cursor: pointer;
+        }
+
+        .volume-slider::-moz-range-thumb {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #ff6b6b;
+            cursor: pointer;
+            border: none;
+        }
+
+        @media (max-width: 768px) {
+            .controls {
+                top: 10px;
+                right: 10px;
+                padding: 15px;
+            }
+            
+            .status {
+                bottom: 10px;
+                left: 10px;
+                font-size: 12px;
+            }
+            
+            .toggle-controls {
+                top: 10px;
+                left: 10px;
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="image-container" id="imageContainer">
+        <img id="scrollingImage" class="scrolling-image" alt="滚动图片">
+    </div>
+    
+    <!-- 图片加载动画 -->
+    <div class="image-loading" id="imageLoading" style="display: none;"></div>
+    
+    <!-- 播放进度条 -->
+    <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+    </div>
+    
+    <!-- 播放状态指示器 -->
+    <div class="play-status" id="playStatus"></div>
+    
+    <!-- 全屏状态指示器 -->
+    <div class="fullscreen-indicator" id="fullscreenIndicator">⛶ 双击切换全屏</div>
+    
+    <!-- 隐藏的音频播放器 -->
+    <audio id="backgroundMusic" preload="auto" loop>
+        您的浏览器不支持音频播放。
+    </audio>
+    
+    <button class="toggle-controls" id="toggleControls" title="控制面板">⚙</button>
+    
+            <div class="controls" id="controls">
+            <div class="control-group">
+                <label for="speedSlider">滚动速度</label>
+                <input type="range" id="speedSlider" class="speed-slider" min="1" max="20" value="1">
+                <div class="speed-display" id="speedDisplay">1</div>
+            </div>
+            
+            <div class="control-group">
+                <label>播放控制</label>
+                <button id="playBtn" class="btn">▶ 播放</button>
+                <button id="pauseBtn" class="btn active">⏸ 暂停</button>
+                <button id="resetBtn" class="btn">⟲ 重置</button>
+            </div>
+            
+            <div class="control-group" id="queueControls" style="display: none;">
+                <label>队列控制</label>
+                <button id="nextBtn" class="btn">⏭ 下一个</button>
+                <button id="prevBtn" class="btn">⏮ 上一个</button>
+                <button id="stopQueueBtn" class="btn">⏹ 停止队列</button>
+                <div style="margin-top: 8px; text-align: center; font-size: 12px; color: #CD7F32;">
+                    <span id="queueProgress">0/0</span>
+                </div>
+            </div>
+            
+            <div class="control-group">
+                <label>背景音乐</label>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;">
+                    <button id="musicToggleBtn" class="btn btn-music">♪ 播放音乐</button>
+                </div>
+                <div style="margin-top: 8px; text-align: center;">
+                    <label for="volumeSlider">音量</label>
+                    <input type="range" id="volumeSlider" class="volume-slider" min="0" max="100" value="50">
+                    <span id="volumeDisplay">50%</span>
+                </div>
+            </div>
+            
+            <div class="control-group">
+                <label>操作提示</label>
+                <button id="showInstructions" class="btn">? 帮助</button>
+                <button id="toggleFullscreenBtn" class="btn">⛶ 全屏</button>
+                <button id="returnToCatalog" class="btn btn-return">⌂ 返回目录</button>
+            </div>
+        </div>
+    
+    <div class="status" id="status">
+        状态: 准备就绪
+    </div>
+    
+            <div class="instructions" id="instructions" style="display: none;">
+            <h2>🎯 使用说明</h2>
+            <p><strong>基本操作:</strong></p>
+            <p>• 使用播放/暂停按钮控制滚动</p>
+            <p>• 调节滑块改变滚动速度</p>
+            <p>• 点击图片切换滚动方向</p>
+            <p><strong>拖拽控制:</strong></p>
+            <p>• 鼠标拖拽图片可手动控制位置</p>
+            <p>• 触摸设备支持手指拖拽</p>
+            <p>• 拖拽结束后有惯性滚动效果</p>
+            <p><strong>音乐控制:</strong></p>
+            <p>• 点击音乐按钮播放/暂停背景音乐</p>
+            <p>• 调节音量滑块控制音乐音量</p>
+            <p><strong>快捷键:</strong></p>
+            <p>• 空格键: 播放/暂停</p>
+            <p>• ESC键: 隐藏/显示控制面板</p>
+            <p>• R键: 重置到起始位置</p>
+            <button class="close-instructions" onclick="document.getElementById('instructions').style.display='none'">关闭</button>
+        </div>
+
+    <script>
+        class FullscreenImageScroller {
+            constructor() {
+                this.image = document.getElementById('scrollingImage');
+                this.container = document.getElementById('imageContainer');
+                this.speedSlider = document.getElementById('speedSlider');
+                this.speedDisplay = document.getElementById('speedDisplay');
+                this.playBtn = document.getElementById('playBtn');
+                this.pauseBtn = document.getElementById('pauseBtn');
+                this.resetBtn = document.getElementById('resetBtn');
+
+                this.status = document.getElementById('status');
+                this.controls = document.getElementById('controls');
+                this.toggleControls = document.getElementById('toggleControls');
+                this.showInstructions = document.getElementById('showInstructions');
+                
+                // 音乐控制元素
+                this.musicToggleBtn = document.getElementById('musicToggleBtn');
+                this.volumeSlider = document.getElementById('volumeSlider');
+                this.volumeDisplay = document.getElementById('volumeDisplay');
+                this.backgroundMusic = document.getElementById('backgroundMusic');
+                
+                // 队列控制元素
+                this.queueControls = document.getElementById('queueControls');
+                this.nextBtn = document.getElementById('nextBtn');
+                this.prevBtn = document.getElementById('prevBtn');
+                this.stopQueueBtn = document.getElementById('stopQueueBtn');
+                this.queueProgress = document.getElementById('queueProgress');
+                
+                this.isPlaying = false;
+                this.currentPosition = 0;
+                this.animationId = null;
+                this.animationFrame = 0;
+                this.speed = 1;
+                this.direction = 1;
+                this.controlsVisible = true;
+                
+                // 播放队列状态
+                this.playMode = 'single'; // single, category, all
+                this.playQueue = [];
+                this.currentQueueIndex = 0;
+                this.isQueuePlaying = false;
+                this.queueAutoAdvance = true;
+                
+                // 音乐状态
+                this.isMusicPlaying = false;
+                this.musicFiles = [
+                    'Music/Pufino - Harmony (freetouse.com).mp3',
+                    'Music/Lukrembo - Bread (freetouse.com).mp3'
+                ];
+                this.currentMusicIndex = 0;
+                
+                // 拖拽状态
+                this.isDragging = false;
+                this.startY = 0;
+                this.startPosition = 0;
+                this.lastY = 0;
+                this.velocity = 0;
+                this.lastTime = 0;
+                this.dragStartTime = 0;
+                this.isInertiaScrolling = false;
+                
+                // 播放进度
+                this.totalHeight = 0;
+                this.progressFill = null;
+                this.playStatus = null;
+                this.imageLoading = null;
+                this.fullscreenIndicator = null;
+                
+                this.init();
+            }
+            
+            init() {
+                console.log('初始化开始...');
+                
+                // 获取新添加的元素
+                this.progressFill = document.getElementById('progressFill');
+                this.playStatus = document.getElementById('playStatus');
+                this.imageLoading = document.getElementById('imageLoading');
+                this.fullscreenIndicator = document.getElementById('fullscreenIndicator');
+                
+                this.bindEvents();
+                this.updateSpeed();
+                this.updateButtonStates();
+                this.updateMusicButton();
+                
+                // 检查URL参数
+                this.checkUrlParams();
+                
+                // 自动隐藏控制面板
+                this.autoHideControls();
+                
+                // 自动进入全屏模式
+                this.autoEnterFullscreen();
+                
+                // 监听全屏状态变化
+                this.bindFullscreenEvents();
+                
+                console.log('初始化完成');
+            }
+            
+            bindEvents() {
+                console.log('绑定事件...');
+                
+                this.speedSlider.addEventListener('input', () => this.updateSpeed());
+                this.playBtn.addEventListener('click', () => {
+                    console.log('播放按钮被点击');
+                    this.play();
+                });
+                this.pauseBtn.addEventListener('click', () => {
+                    console.log('暂停按钮被点击');
+                    this.pause();
+                });
+                this.resetBtn.addEventListener('click', () => {
+                    console.log('重置按钮被点击');
+                    this.reset();
+                });
+                
+                this.toggleControls.addEventListener('click', () => this.toggleControlsPanel());
+                this.showInstructions.addEventListener('click', () => this.showInstructionsPanel());
+                
+                // 全屏切换按钮事件
+                document.getElementById('toggleFullscreenBtn').addEventListener('click', () => {
+                    console.log('全屏按钮被点击');
+                    this.toggleFullscreen();
+                });
+                
+                // 返回目录按钮事件
+                document.getElementById('returnToCatalog').addEventListener('click', () => {
+                    console.log('返回目录按钮被点击');
+                    this.returnToCatalog();
+                });
+                
+                // 音乐控制事件
+                this.musicToggleBtn.addEventListener('click', () => {
+                    console.log('音乐按钮被点击');
+                    this.toggleMusic();
+                });
+                this.volumeSlider.addEventListener('input', () => this.updateVolume());
+                
+                // 队列控制事件
+                this.nextBtn.addEventListener('click', () => this.playNextInQueue());
+                this.prevBtn.addEventListener('click', () => this.playPrevInQueue());
+                this.stopQueueBtn.addEventListener('click', () => this.stopQueue());
+                
+                // 拖拽事件
+                this.image.addEventListener('mousedown', (e) => this.startDrag(e));
+                this.image.addEventListener('mousemove', (e) => this.drag(e));
+                this.image.addEventListener('mouseup', (e) => this.endDrag(e));
+                this.image.addEventListener('mouseleave', (e) => this.endDrag(e));
+                
+                // 触摸事件支持
+                this.image.addEventListener('touchstart', (e) => this.startTouch(e));
+                this.image.addEventListener('touchmove', (e) => this.touchMove(e));
+                this.image.addEventListener('touchend', (e) => this.endTouch(e));
+                
+                // 点击图片切换方向（需要区分拖拽和点击）
+                this.image.addEventListener('click', (e) => this.handleImageClick(e));
+                
+                // 键盘快捷键
+                document.addEventListener('keydown', (e) => this.handleKeyPress(e));
+                
+                // 鼠标移动显示控制面板
+                document.addEventListener('mousemove', () => this.showControls());
+            }
+            
+            handleKeyPress(event) {
+                switch(event.code) {
+                    case 'Space':
+                        event.preventDefault();
+                        this.isPlaying ? this.pause() : this.play();
+                        break;
+                    case 'Escape':
+                        this.toggleControlsPanel();
+                        break;
+                    case 'KeyR':
+                        this.reset();
+                        break;
+                }
+            }
+            
+
+            
+            // 检查URL参数，获取项目名称
+            checkUrlParams() {
+                console.log('检查URL参数...');
+                const urlParams = new URLSearchParams(window.location.search);
+                const itemName = urlParams.get('item');
+                const imagePath = urlParams.get('image');
+                const playMode = urlParams.get('mode');
+                const playQueue = urlParams.get('queue');
+                const category = urlParams.get('category');
+                
+                console.log('URL参数:', { itemName, imagePath, playMode, playQueue, category });
+                
+                if (playMode && playQueue) {
+                    // 队列播放模式
+                    this.playMode = playMode;
+                    this.playQueue = JSON.parse(decodeURIComponent(playQueue));
+                    this.currentQueueIndex = 0;
+                    
+                    console.log('队列播放模式初始化:', {
+                        playMode: playMode,
+                        playQueue: this.playQueue,
+                        currentQueueIndex: this.currentQueueIndex,
+                        firstItem: this.playQueue[0]
+                    });
+                    
+                    if (category) {
+                        this.status.textContent = `状态: 类别播放模式 - ${category}`;
+                    } else if (playMode === 'all') {
+                        this.status.textContent = `状态: 全部播放模式 - 共${this.playQueue.length}个项目`;
+                    }
+                    
+                    // 显示队列控制面板
+                    this.showQueueControls();
+                    
+                    // 开始播放队列中的第一个项目
+                    this.playCurrentQueueItem();
+                } else if (itemName) {
+                    // 单个项目播放模式
+                    this.playMode = 'single';
+                    this.status.textContent = `状态: 已选择项目 - ${itemName}`;
+                    this.showItemName(itemName);
+                    
+                    // 单个播放模式不显示中央标题，只显示左上角项目名称
+                    
+                    // 如果有图片路径，自动加载图片
+                    if (imagePath) {
+                        console.log('发现图片路径，开始加载:', imagePath);
+                        this.loadImage(imagePath, itemName);
+                    } else {
+                        console.log('没有图片路径');
+                    }
+                } else {
+                    console.log('没有播放参数');
+                }
+            }
+
+            // 自动加载图片
+            loadImage(imagePath, itemName) {
+                console.log('开始加载图片:', imagePath);
+                
+                // 显示加载动画
+                this.showImageLoading();
+                
+                const img = new Image();
+                img.onload = () => {
+                    console.log('图片加载成功:', imagePath);
+                    
+                    // 隐藏加载动画
+                    this.hideImageLoading();
+                    
+                    // 设置图片源
+                    this.image.src = imagePath;
+                    
+                    // 计算总高度用于进度条
+                    this.totalHeight = this.image.naturalHeight - window.innerHeight;
+                    
+                    // 添加加载完成类，触发CSS动画
+                    setTimeout(() => {
+                        this.image.classList.add('loaded');
+                    }, 100);
+                    
+                    this.status.textContent = `状态: 图片已加载 - ${imagePath.split('/').pop()}`;
+                    this.reset();
+                    this.play();
+                    
+                    // 如果是队列播放模式，设置自动播放下一个
+                    if (this.playMode !== 'single') {
+                        this.queueAutoAdvance = true;
+                    }
+                };
+                img.onerror = () => {
+                    console.error('图片加载失败:', imagePath);
+                    this.hideImageLoading();
+                    this.status.textContent = '状态: 图片加载失败，请检查文件路径';
+                };
+                img.src = imagePath;
+            }
+            
+            // 显示项目名称（左上角，仅显示名称）
+            showItemName(itemName) {
+                console.log('showItemName 被调用，项目名称:', itemName);
+                
+                // 移除之前的项目名称显示
+                const existingItemName = document.getElementById('itemNameDisplay');
+                if (existingItemName) {
+                    existingItemName.remove();
+                }
+                
+                // 在页面上只显示项目名称
+                const itemNameDisplay = document.createElement('div');
+                itemNameDisplay.style.cssText = `
+                    position: fixed;
+                    top: 80px;
+                    left: 20px;
+                    background: rgba(0, 0, 0, 0.7);
+                    color: white;
+                    padding: 15px 25px;
+                    border-radius: 20px;
+                    font-size: 16px;
+                    font-weight: bold;
+                    z-index: 1000;
+                    backdrop-filter: blur(10px);
+                    border: 1px solid rgba(255, 255, 255, 0.2);
+                `;
+                
+                itemNameDisplay.textContent = itemName;
+                itemNameDisplay.id = 'itemNameDisplay';
+                document.body.appendChild(itemNameDisplay);
+                
+                console.log('左上角项目名称显示已创建:', itemName);
+            }
+            
+            // 显示标题和说明（中央显示，格式统一）
+            showTitleAndDescription(itemName) {
+                console.log('showTitleAndDescription 被调用，项目名称:', itemName);
+                
+                // 移除之前的标题显示
+                const existingTitle = document.getElementById('titleDisplay');
+                if (existingTitle) {
+                    existingTitle.remove();
+                }
+                
+                // 创建标题显示区域
+                const titleDisplay = document.createElement('div');
+                titleDisplay.style.cssText = `
+                    position: fixed;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    background: rgba(0, 0, 0, 0.9);
+                    color: white;
+                    padding: 40px;
+                    border-radius: 25px;
+                    text-align: center;
+                    z-index: 1002;
+                    backdrop-filter: blur(15px);
+                    border: 2px solid rgba(255, 255, 255, 0.3);
+                    min-width: 400px;
+                    max-width: 600px;
+                `;
+                titleDisplay.id = 'titleDisplay';
+                
+                // 添加标题
+                const title = document.createElement('h1');
+                title.style.cssText = `
+                    font-size: 2.5em;
+                    margin-bottom: 20px;
+                    color: #CD7F32;
+                    text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+                `;
+                title.textContent = itemName;
+                
+                // 添加说明（根据项目名称显示相应的说明）
+                const description = document.createElement('p');
+                description.style.cssText = `
+                    font-size: 1.2em;
+                    line-height: 1.6;
+                    color: #CD7F32;
+                `;
+                description.textContent = this.getItemDescription(itemName);
+                
+                titleDisplay.appendChild(title);
+                titleDisplay.appendChild(description);
+                document.body.appendChild(titleDisplay);
+                
+                console.log('中央标题显示已创建，显示内容:', {
+                    title: itemName,
+                    description: this.getItemDescription(itemName)
+                });
+                
+                // 3秒后自动隐藏标题显示
+                setTimeout(() => {
+                    if (titleDisplay.parentNode) {
+                        titleDisplay.style.transition = 'opacity 1s ease';
+                        titleDisplay.style.opacity = '0';
+                        setTimeout(() => {
+                            if (titleDisplay.parentNode) {
+                                titleDisplay.remove();
+                            }
+                        }, 1000);
+                    }
+                }, 3000);
+            }
+            
+            // 显示图片加载动画
+            showImageLoading() {
+                if (this.imageLoading) {
+                    this.imageLoading.style.display = 'block';
+                }
+            }
+            
+            // 隐藏图片加载动画
+            hideImageLoading() {
+                if (this.imageLoading) {
+                    this.imageLoading.style.display = 'none';
+                }
+            }
+            
+            // 显示播放状态
+            showPlayStatus(message, type = 'info') {
+                if (this.playStatus) {
+                    this.playStatus.textContent = message;
+                    this.playStatus.className = `play-status show ${type}`;
+                    
+                    // 3秒后自动隐藏
+                    setTimeout(() => {
+                        this.playStatus.classList.remove('show');
+                    }, 3000);
+                }
+            }
+            
+            // 更新播放进度条
+            updateProgress() {
+                if (this.progressFill && this.totalHeight > 0) {
+                    const progress = Math.min((this.currentPosition / this.totalHeight) * 100, 100);
+                    this.progressFill.style.width = `${progress}%`;
+                }
+            }
+            
+            // 获取项目说明（以实际文件名为准）
+            getItemDescription(itemName) {
+                const descriptions = {
+                    // 纱帘系列
+                    '流光纱': '轻盈飘逸，如流水般柔美',
+                    '窗纱': '通透轻盈，营造梦幻氛围',
+                    '菱形纱': '几何美感，现代简约风格',
+                    '树纹纱': '自然纹理，回归自然之美',
+                    '繁枝镜面纱': '精致繁复，镜面光泽效果',
+                    '松叶绣雪尼尔': '立体刺绣，质感丰富',
+                    '线格纱-柔白': '经典格纹，柔美白色',
+                    '云花轻梦-灰白': '云朵花纹，轻柔梦境',
+                    
+                    // 布艺 植物/自然系列
+                    '森镜林语-沉棕': '森林意境，深沉棕色',
+                    '卵石海岸': '海岸风情，卵石纹理',
+                    '茹伊丛林': '丛林图案，自然野趣',
+                    '半夏棉麻': '棉麻材质，半夏时节',
+                    '莫言亚光': '亚光质感，低调奢华',
+                    '狂野-墨绿': '狂野风格，墨绿色调',
+                    '旷野-米咖': '旷野风情，米咖色调',
+                    
+                    // 布艺 花卉/浪漫系列
+                    '繁花-桃粉': '繁花似锦，桃粉浪漫',
+                    '翠微竹韵-金缎': '竹韵悠长，金色缎面',
+                    '翠微竹韵-银雾': '竹韵悠长，银色雾感',
+                    '风沙流影': '风沙流动，光影变幻',
+                    
+                    // 布艺 欧式/典雅系列
+                    '凡尔赛-雾灰': '法式典雅，雾灰色调',
+                    '弗特伊-雾灰': '古典优雅，雾灰色调',
+                    '弗特伊-暮金': '古典优雅，暮金色调',
+                    '枝叶绣-雾蓝': '枝叶刺绣，雾蓝色调',
+                    'WHL窗帘-枝叶绣': 'WHL品牌，枝叶刺绣工艺',
+                    
+                    // 遮阳帘系列
+                    '罗马帘': '经典罗马帘，优雅升降',
+                    '斑马帘': '斑马条纹，现代时尚',
+                    '梦幻帘': '梦幻效果，浪漫氛围',
+                    '蜂巢帘': '蜂巢结构，独特质感',
+                    '香格里拉帘': '香格里拉风格，神秘优雅',
+                    
+                    // 高端布艺系列
+                    '米洛缇': '高端布艺，米洛缇系列',
+                    '香榭丽': '高端布艺，香榭丽系列',
+                    '幕洛编织麻': '高端布艺，编织麻材质',
+                    '美丽奴': '高端布艺，美丽奴系列'
+                };
+                
+                return descriptions[itemName] || '精美窗帘布艺，为您的生活增添优雅与温馨';
+            }
+            
+            // 显示队列控制面板
+            showQueueControls() {
+                this.queueControls.style.display = 'block';
+                this.updateQueueProgress();
+            }
+            
+            // 隐藏队列控制面板
+            hideQueueControls() {
+                this.queueControls.style.display = 'none';
+            }
+            
+            // 更新队列进度显示
+            updateQueueProgress() {
+                this.queueProgress.textContent = `${this.currentQueueIndex + 1}/${this.playQueue.length}`;
+            }
+            
+            // 播放当前队列项目
+            playCurrentQueueItem() {
+                if (this.playQueue.length === 0) return;
+                
+                const currentItem = this.playQueue[this.currentQueueIndex];
+                const imagePath = `Products/${currentItem}.JPG`;
+                
+                console.log('播放队列项目:', {
+                    currentQueueIndex: this.currentQueueIndex,
+                    currentItem: currentItem,
+                    imagePath: imagePath,
+                    playQueueLength: this.playQueue.length,
+                    playQueue: this.playQueue
+                });
+                
+                // 显示左上角项目名称
+                this.showItemName(currentItem);
+                
+                // 显示标题和说明
+                this.showTitleAndDescription(currentItem);
+                
+                // 加载图片
+                this.loadImage(imagePath, currentItem);
+                
+                // 更新进度显示
+                this.updateQueueProgress();
+            }
+            
+            // 播放下一个队列项目
+            playNextInQueue() {
+                if (this.playQueue.length === 0) return;
+                
+                this.currentQueueIndex = (this.currentQueueIndex + 1) % this.playQueue.length;
+                this.playCurrentQueueItem();
+            }
+            
+            // 播放上一个队列项目
+            playPrevInQueue() {
+                if (this.playQueue.length === 0) return;
+                
+                this.currentQueueIndex = this.currentQueueIndex === 0 ? 
+                    this.playQueue.length - 1 : this.currentQueueIndex - 1;
+                this.playCurrentQueueItem();
+            }
+            
+            // 停止队列播放
+            stopQueue() {
+                this.isQueuePlaying = false;
+                this.queueAutoAdvance = false;
+                this.pause();
+                this.status.textContent = '状态: 队列播放已停止';
+                this.hideQueueControls();
+            }
+            
+            // 自动播放下一个项目（在图片播放完成后调用）
+            autoAdvanceQueue() {
+                if (this.playMode !== 'single' && this.queueAutoAdvance) {
+                    setTimeout(() => {
+                        this.playNextInQueue();
+                    }, 5000); // 5秒后自动播放下一个
+                }
+            }
+            
+            updateSpeed() {
+                this.speed = parseInt(this.speedSlider.value);
+                this.speedDisplay.textContent = this.speed;
+            }
+            
+            play() {
+                console.log('play() 方法被调用');
+                
+                if (!this.image.src || this.image.src === 'data:') {
+                    console.log('图片未加载，无法播放');
+                    this.status.textContent = '状态: 图片未加载，无法播放';
+                    return;
+                }
+                
+                this.isPlaying = true;
+                this.animationFrame = 0; // 重置动画帧计数
+                this.updateButtonStates();
+                this.status.textContent = `状态: 正在播放 - 速度: ${this.speed}`;
+                
+                console.log('开始播放动画');
+                this.animate();
+                
+                // 播放时隐藏状态栏
+                setTimeout(() => {
+                    this.status.classList.add('hidden');
+                }, 2000);
+            }
+            
+            pause() {
+                this.isPlaying = false;
+                this.updateButtonStates();
+                this.status.textContent = '状态: 已暂停';
+                this.status.classList.remove('hidden');
+                
+                if (this.animationId) {
+                    cancelAnimationFrame(this.animationId);
+                    this.animationId = null;
+                }
+            }
+            
+            reset() {
+                this.pause();
+                this.currentPosition = 0;
+                this.direction = 1;
+                this.image.style.transform = 'translateY(0px)';
+                this.status.textContent = '状态: 已重置到起始位置';
+                this.status.classList.remove('hidden');
+                
+                // 重置进度条
+                this.updateProgress();
+            }
+            
+            toggleDirection() {
+                this.direction *= -1;
+                const directionText = this.direction === 1 ? '向下' : '向上';
+                this.status.textContent = `状态: 滚动方向已切换为${directionText}`;
+            }
+            
+            updateButtonStates() {
+                if (this.isPlaying) {
+                    this.playBtn.classList.add('active');
+                    this.pauseBtn.classList.remove('active');
+                } else {
+                    this.playBtn.classList.remove('active');
+                    this.pauseBtn.classList.add('active');
+                }
+            }
+            
+            toggleControlsPanel() {
+                this.controlsVisible = !this.controlsVisible;
+                this.controls.style.display = this.controlsVisible ? 'block' : 'none';
+                this.toggleControls.title = this.controlsVisible ? '隐藏控制面板' : '显示控制面板';
+            }
+            
+            showControls() {
+                if (!this.controlsVisible) return;
+                this.controls.classList.remove('hidden');
+                clearTimeout(this.hideTimeout);
+                this.hideTimeout = setTimeout(() => {
+                    this.controls.classList.add('hidden');
+                }, 3000);
+            }
+            
+            autoHideControls() {
+                this.hideTimeout = setTimeout(() => {
+                    this.controls.classList.add('hidden');
+                }, 3000);
+            }
+            
+            showInstructionsPanel() {
+                document.getElementById('instructions').style.display = 'block';
+            }
+            
+            // 拖拽相关方法
+            startDrag(event) {
+                event.preventDefault();
+                this.isDragging = true;
+                this.isInertiaScrolling = false;
+                this.startY = event.clientY;
+                this.startPosition = this.currentPosition;
+                this.lastY = this.startY;
+                this.lastTime = Date.now();
+                this.dragStartTime = Date.now();
+                this.velocity = 0;
+                
+                // 暂停自动播放
+                if (this.isPlaying) {
+                    this.pause();
+                }
+                
+                // 添加拖拽时的视觉反馈
+                this.image.style.transition = 'none';
+                this.image.style.cursor = 'grabbing';
+                
+                this.status.textContent = '状态: 拖拽中 - 可上下拖动图片';
+            }
+            
+            drag(event) {
+                if (!this.isDragging) return;
+                
+                event.preventDefault();
+                const currentY = event.clientY;
+                const deltaY = this.startY - currentY;
+                const newPosition = this.startPosition + deltaY;
+                
+                // 限制拖拽范围
+                const containerHeight = this.container.clientHeight;
+                const imageHeight = this.image.naturalHeight;
+                const maxScroll = Math.max(0, imageHeight - containerHeight);
+                
+                if (maxScroll > 0) {
+                    this.currentPosition = Math.max(0, Math.min(maxScroll, newPosition));
+                    this.image.style.transform = `translateY(-${this.currentPosition}px)`;
+                }
+                
+                // 计算速度
+                const currentTime = Date.now();
+                const timeDelta = currentTime - this.lastTime;
+                if (timeDelta > 0) {
+                    this.velocity = (this.lastY - currentY) / timeDelta;
+                }
+                this.lastY = currentY;
+                this.lastTime = currentTime;
+            }
+            
+            endDrag(event) {
+                if (!this.isDragging) return;
+                
+                this.isDragging = false;
+                
+                // 恢复图片过渡效果和光标
+                this.image.style.transition = 'transform 0.3s ease-out';
+                this.image.style.cursor = 'grab';
+                
+                // 应用惯性滚动
+                if (Math.abs(this.velocity) > 0.5) {
+                    this.applyInertia();
+                } else {
+                    this.status.textContent = '状态: 拖拽结束';
+                }
+            }
+            
+            // 应用惯性滚动
+            applyInertia() {
+                if (this.isInertiaScrolling) return;
+                
+                this.isInertiaScrolling = true;
+                this.status.textContent = '状态: 惯性滚动中';
+                
+                const inertiaDuration = 1000; // 惯性滚动持续时间
+                const startTime = Date.now();
+                const startVelocity = this.velocity;
+                const startPosition = this.currentPosition;
+                
+                const animateInertia = (currentTime) => {
+                    const elapsed = currentTime - startTime;
+                    const progress = Math.min(elapsed / inertiaDuration, 1);
+                    
+                    // 使用缓出函数
+                    const easeOutProgress = 1 - Math.pow(1 - progress, 3);
+                    
+                    // 计算新位置
+                    const distance = startVelocity * easeOutProgress * 100;
+                    const newPosition = startPosition + distance;
+                    
+                    // 限制边界
+                    const containerHeight = this.container.clientHeight;
+                    const imageHeight = this.image.naturalHeight;
+                    const maxScroll = Math.max(0, imageHeight - containerHeight);
+                    
+                    this.currentPosition = Math.max(0, Math.min(maxScroll, newPosition));
+                    this.image.style.transform = `translateY(-${this.currentPosition}px)`;
+                    
+                    // 更新进度条
+                    this.updateProgress();
+                    
+                    if (progress < 1 && Math.abs(startVelocity) > 0.1) {
+                        requestAnimationFrame(animateInertia);
+                    } else {
+                        this.isInertiaScrolling = false;
+                        this.status.textContent = '状态: 惯性滚动结束';
+                    }
+                };
+                
+                requestAnimationFrame(animateInertia);
+            }
+            
+            // 触摸事件支持
+            startTouch(event) {
+                event.preventDefault();
+                const touch = event.touches[0];
+                this.isDragging = true;
+                this.isInertiaScrolling = false;
+                this.startY = touch.clientY;
+                this.startPosition = this.currentPosition;
+                this.lastY = this.startY;
+                this.lastTime = Date.now();
+                this.dragStartTime = Date.now();
+                this.velocity = 0;
+                
+                // 暂停自动播放
+                if (this.isPlaying) {
+                    this.pause();
+                }
+                
+                // 添加触摸时的视觉反馈
+                this.image.style.transition = 'none';
+                this.image.style.cursor = 'grabbing';
+                
+                this.status.textContent = '状态: 触摸拖拽中';
+            }
+            
+            touchMove(event) {
+                if (!this.isDragging) return;
+                
+                event.preventDefault();
+                const touch = event.touches[0];
+                const currentY = touch.clientY;
+                const deltaY = this.startY - currentY;
+                const newPosition = this.startPosition + deltaY;
+                
+                // 限制拖拽范围
+                const containerHeight = this.container.clientHeight;
+                const imageHeight = this.image.naturalHeight;
+                const maxScroll = Math.max(0, imageHeight - containerHeight);
+                
+                if (maxScroll > 0) {
+                    this.currentPosition = Math.max(0, Math.min(maxScroll, newPosition));
+                    this.image.style.transform = `translateY(-${this.currentPosition}px)`;
+                }
+                
+                // 计算速度
+                const currentTime = Date.now();
+                const timeDelta = currentTime - this.lastTime;
+                if (timeDelta > 0) {
+                    this.velocity = (this.lastY - currentY) / timeDelta;
+                }
+                this.lastY = currentY;
+                this.lastTime = currentTime;
+            }
+            
+            endTouch(event) {
+                if (!this.isDragging) return;
+                
+                this.isDragging = false;
+                
+                // 恢复图片过渡效果和光标
+                this.image.style.transition = 'transform 0.3s ease-out';
+                this.image.style.cursor = 'grab';
+                
+                // 应用惯性滚动
+                if (Math.abs(this.velocity) > 0.5) {
+                    this.applyInertia();
+                } else {
+                    this.status.textContent = '状态: 触摸拖拽结束';
+                }
+            }
+            
+            // 惯性滚动
+            applyInertia() {
+                const friction = 0.95;
+                const animate = () => {
+                    if (Math.abs(this.velocity) < 0.1) {
+                        this.status.textContent = '状态: 惯性滚动结束';
+                        return;
+                    }
+                    
+                    this.velocity *= friction;
+                    this.currentPosition += this.velocity * 16; // 16ms per frame
+                    
+                    // 限制范围
+                    const containerHeight = this.container.clientHeight;
+                    const imageHeight = this.image.naturalHeight;
+                    const maxScroll = Math.max(0, imageHeight - containerHeight);
+                    
+                    if (this.currentPosition < 0) {
+                        this.currentPosition = 0;
+                        this.velocity = 0;
+                    } else if (this.currentPosition > maxScroll) {
+                        this.currentPosition = maxScroll;
+                        this.velocity = 0;
+                    }
+                    
+                    this.image.style.transform = `translateY(-${this.currentPosition}px)`;
+                    requestAnimationFrame(animate);
+                };
+                
+                animate();
+            }
+            
+            // 处理图片点击（区分拖拽和点击）
+            handleImageClick(event) {
+                // 如果拖拽距离很小，认为是点击
+                const dragDistance = Math.abs(event.clientY - this.startY);
+                if (dragDistance < 5 && !this.isDragging) {
+                    this.toggleDirection();
+                }
+            }
+            
+            // 音乐控制方法
+            toggleMusic() {
+                if (this.isMusicPlaying) {
+                    this.pauseMusic();
+                } else {
+                    this.playMusic();
+                }
+            }
+            
+            playMusic() {
+                console.log('playMusic() 方法被调用');
+                // 如果音乐还没有加载，先加载第一首
+                if (!this.backgroundMusic.src || this.backgroundMusic.src === 'data:') {
+                    console.log('音乐未加载，开始加载第一首');
+                    this.loadNextMusic();
+                }
+                
+                console.log('尝试播放音乐...');
+                this.backgroundMusic.play().then(() => {
+                    console.log('音乐播放成功');
+                    this.isMusicPlaying = true;
+                    this.updateMusicButton();
+                    this.status.textContent = '状态: 音乐正在播放';
+                }).catch(error => {
+                    console.error('音乐播放失败:', error);
+                    this.status.textContent = '状态: 音乐播放失败 - ' + error.message;
+                });
+            }
+            
+            pauseMusic() {
+                this.backgroundMusic.pause();
+                this.isMusicPlaying = false;
+                this.updateMusicButton();
+                this.status.textContent = '状态: 音乐已暂停';
+            }
+            
+            loadNextMusic() {
+                console.log('loadNextMusic() 方法被调用');
+                if (this.musicFiles.length === 0) {
+                    console.log('没有音乐文件');
+                    return;
+                }
+                
+                const musicFile = this.musicFiles[this.currentMusicIndex];
+                console.log('加载音乐文件:', musicFile);
+                this.backgroundMusic.src = musicFile;
+                
+                this.backgroundMusic.addEventListener('ended', () => {
+                    console.log('音乐播放结束，切换到下一首');
+                    this.currentMusicIndex = (this.currentMusicIndex + 1) % this.musicFiles.length;
+                    this.loadNextMusic();
+                    if (this.isMusicPlaying) {
+                        this.backgroundMusic.play();
+                    }
+                });
+            }
+            
+            updateMusicButton() {
+                if (this.isMusicPlaying) {
+                    this.musicToggleBtn.textContent = '⏸ 暂停音乐';
+                    this.musicToggleBtn.title = '暂停背景音乐';
+                } else {
+                    this.musicToggleBtn.textContent = '♪ 播放音乐';
+                    this.musicToggleBtn.title = '播放背景音乐';
+                }
+            }
+            
+            updateVolume() {
+                const volume = this.volumeSlider.value / 100;
+                this.backgroundMusic.volume = volume;
+                this.volumeDisplay.textContent = this.volumeSlider.value + '%';
+            }
+            
+            animate() {
+                if (!this.isPlaying) return;
+                
+                const containerHeight = this.container.clientHeight;
+                const imageHeight = this.image.naturalHeight;
+                const maxScroll = Math.max(0, imageHeight - containerHeight);
+                
+                if (maxScroll > 0) {
+                    this.currentPosition += this.direction * this.speed;
+                    
+                    // 循环滚动
+                    if (this.currentPosition >= maxScroll) {
+                        this.currentPosition = 0;
+                        
+                        // 如果是队列播放模式，在图片滚动完成后自动播放下一个
+                        if (this.playMode !== 'single' && this.queueAutoAdvance) {
+                            // 增加延迟时间，让用户有足够时间观看当前图片
+                            setTimeout(() => {
+                                console.log('图片滚动完成，准备播放下一个项目');
+                                this.playNextInQueue();
+                            }, 8000); // 8秒后自动播放下一个，给用户更多观看时间
+                        }
+                    } else if (this.currentPosition <= 0) {
+                        this.currentPosition = maxScroll;
+                    }
+                    
+                    this.image.style.transform = `translateY(-${this.currentPosition}px)`;
+                    
+                    // 更新进度条
+                    this.updateProgress();
+                    
+                    // 更新状态显示（减少频率，提高性能）
+                    if (this.animationFrame % 30 === 0) { // 每30帧更新一次状态
+                        const progress = Math.round((this.currentPosition / maxScroll) * 100);
+                        this.status.textContent = `状态: 播放中 - ${progress}%`;
+                    }
+                    this.animationFrame++;
+                }
+                
+                this.animationId = requestAnimationFrame(() => this.animate());
+            }
+
+            // 绑定全屏事件
+            bindFullscreenEvents() {
+                // 监听全屏状态变化
+                document.addEventListener('fullscreenchange', () => this.updateFullscreenIndicator());
+                document.addEventListener('webkitfullscreenchange', () => this.updateFullscreenIndicator());
+                document.addEventListener('msfullscreenchange', () => this.updateFullscreenIndicator());
+            }
+            
+            // 更新全屏状态指示器
+            updateFullscreenIndicator() {
+                if (this.fullscreenIndicator) {
+                    const isFullscreen = !!(document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement);
+                    
+                    if (isFullscreen) {
+                        this.fullscreenIndicator.textContent = '⛶ 双击退出全屏';
+                        this.fullscreenIndicator.classList.add('fullscreen');
+                    } else {
+                        this.fullscreenIndicator.textContent = '⛶ 双击进入全屏';
+                        this.fullscreenIndicator.classList.remove('fullscreen');
+                    }
+                    
+                    // 显示指示器
+                    this.fullscreenIndicator.classList.add('show');
+                    
+                    // 3秒后自动隐藏
+                    setTimeout(() => {
+                        this.fullscreenIndicator.classList.remove('show');
+                    }, 3000);
+                }
+                
+                // 同时更新控制面板中的全屏按钮文本
+                const toggleFullscreenBtn = document.getElementById('toggleFullscreenBtn');
+                if (toggleFullscreenBtn) {
+                    const isFullscreen = !!(document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement);
+                    if (isFullscreen) {
+                        toggleFullscreenBtn.textContent = '⛶ 退出全屏';
+                    } else {
+                        toggleFullscreenBtn.textContent = '⛶ 全屏';
+                    }
+                }
+            }
+            
+            // 自动进入全屏模式
+            autoEnterFullscreen() {
+                // 延迟一点时间，确保页面完全加载
+                setTimeout(() => {
+                    if (!document.fullscreenElement) {
+                        this.enterFullscreen();
+                    }
+                }, 1000);
+            }
+            
+            // 进入全屏
+            enterFullscreen() {
+                if (document.documentElement.requestFullscreen) {
+                    document.documentElement.requestFullscreen().then(() => {
+                        console.log('已进入全屏模式');
+                        this.updateFullscreenIndicator();
+                    }).catch(err => {
+                        console.log('全屏请求被拒绝:', err);
+                    });
+                } else if (document.documentElement.webkitRequestFullscreen) {
+                    document.documentElement.webkitRequestFullscreen();
+                } else if (document.documentElement.msRequestFullscreen) {
+                    document.documentElement.msRequestFullscreen();
+                }
+            }
+            
+            // 退出全屏
+            exitFullscreen() {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen().then(() => {
+                        console.log('已退出全屏模式');
+                        this.updateFullscreenIndicator();
+                    }).catch(err => {
+                        console.log('退出全屏失败:', err);
+                    });
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                } else if (document.msExitFullscreen) {
+                    document.msExitFullscreen();
+                }
+            }
+            
+            // 切换全屏状态
+            toggleFullscreen() {
+                if (document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement) {
+                    this.exitFullscreen();
+                } else {
+                    this.enterFullscreen();
+                }
+            }
+            
+            returnToCatalog() {
+                console.log('返回目录按钮被点击，返回目录页');
+                window.location.href = 'catalog.html';
+            }
+        }
+        
+        // 初始化应用
+        document.addEventListener('DOMContentLoaded', () => {
+            window.fullscreenScroller = new FullscreenImageScroller();
+        });
+        
+        // 全屏支持 - 双击切换全屏
+        document.addEventListener('dblclick', (e) => {
+            // 防止双击图片时触发方向切换
+            e.preventDefault();
+            e.stopPropagation();
+            
+            // 调用全屏切换函数
+            if (window.fullscreenScroller) {
+                window.fullscreenScroller.toggleFullscreen();
+            }
+        });
+        
+
+    </script>
+</body>
+</html>
