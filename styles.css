@@ -1,0 +1,1002 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: #f5f5f5;
+    color: #333;
+    line-height: 1.6;
+}
+
+/* 登录页面样式 */
+.login-page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.login-container {
+    background: white;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+}
+
+.login-container h1 {
+    color: #2c3e50;
+    margin-bottom: 30px;
+    font-size: 28px;
+}
+
+.login-form .form-group {
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.login-form label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.login-form input {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #ecf0f1;
+    border-radius: 6px;
+    font-size: 16px;
+    transition: border-color 0.3s;
+}
+
+.login-form input:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+/* 主应用样式 */
+.main-app {
+    display: block;
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 15px;
+}
+
+/* 头部样式 */
+header {
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 15px;
+}
+
+.header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.header-top h1 {
+    color: #2c3e50;
+    margin: 0;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.user-info span {
+    color: #7f8c8d;
+    font-weight: 500;
+}
+
+.btn-logout {
+    background: #e74c3c;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.3s;
+}
+
+.btn-logout:hover {
+    background: #c0392b;
+}
+
+.header-controls {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.tab-btn {
+    padding: 10px 20px;
+    border: none;
+    background: #ecf0f1;
+    color: #7f8c8d;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-size: 14px;
+}
+
+.tab-btn.active {
+    background: #3498db;
+    color: white;
+}
+
+.tab-btn:hover {
+    background: #2980b9;
+    color: white;
+}
+
+/* 标签页内容 */
+.tab-content,
+.admin-tab-content {
+    display: none;
+}
+
+.tab-content.active,
+.admin-tab-content.active {
+    display: block;
+}
+
+/* 卡片样式 */
+.card {
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 15px;
+}
+
+.card h2 {
+    color: #2c3e50;
+    margin-bottom: 25px;
+    border-bottom: 2px solid #ecf0f1;
+    padding-bottom: 10px;
+}
+
+.card h3 {
+    color: #2c3e50;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #ecf0f1;
+    padding-bottom: 8px;
+}
+
+/* 表单样式 */
+.form-group {
+    margin-bottom: 12px;
+}
+
+/* 确保下拉框选项显示在最上层 */
+.form-group select option {
+    z-index: 1000;
+}
+
+/* 为所有select元素添加高z-index */
+select {
+    z-index: 50;
+    position: relative;
+}
+
+/* 确保下拉框展开时不被遮挡 */
+select:focus {
+    z-index: 100;
+}
+
+/* 为下拉框选项添加样式 */
+select option {
+    background: white;
+    color: #333;
+    padding: 8px;
+}
+
+/* 修复快速查价行中下拉框的z-index */
+.pricing-row-content .form-group {
+    position: relative;
+    z-index: 10;
+}
+
+.pricing-row-content .form-group select {
+    z-index: 200;
+    position: relative;
+}
+
+.pricing-row-content .form-group select:focus {
+    z-index: 300;
+}
+
+.pricing-row-content .form-group select option {
+    z-index: 400;
+    background: white;
+    color: #333;
+    padding: 8px;
+}
+
+.pricing-row-content .form-group:nth-child(1) { /* 序号 */
+    min-width: 30px;
+}
+
+.pricing-row-content .form-group:nth-child(2) { /* 品类 */
+    min-width: 80px;
+}
+
+.pricing-row-content .form-group:nth-child(3) { /* 系统 */
+    min-width: 80px;
+}
+
+.pricing-row-content .form-group:nth-child(4) { /* 产品编号1 */
+    min-width: 90px;
+}
+
+.pricing-row-content .form-group:nth-child(5) { /* 产品编号2 */
+    min-width: 90px;
+}
+
+.pricing-row-content .form-group:nth-child(6) { /* 宽度 */
+    min-width: 50px;
+}
+
+.pricing-row-content .form-group:nth-child(7) { /* 宽度单位 */
+    min-width: 40px;
+}
+
+.pricing-row-content .form-group:nth-child(8) { /* 高度 */
+    min-width: 50px;
+}
+
+.pricing-row-content .form-group:nth-child(9) { /* 高度单位 */
+    min-width: 40px;
+}
+
+.pricing-row-content .form-group:nth-child(10) { /* 数量 */
+    min-width: 40px;
+}
+
+.pricing-row-content .form-group:nth-child(11) { /* 单价 */
+    min-width: 60px;
+}
+
+.pricing-row-content .form-group:nth-child(12) { /* 小计 */
+    min-width: 60px;
+}
+
+.pricing-row-content .form-group:nth-child(13) { /* 合计 */
+    min-width: 60px;
+}
+
+.pricing-row-content .form-group:nth-child(14) { /* 删除按钮 */
+    min-width: 50px;
+}
+
+.form-row {
+    display: flex;
+    gap: 15px;
+    align-items: flex-end;
+}
+
+.form-row .form-group {
+    flex: 1;
+    margin-bottom: 0;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+    color: #2c3e50;
+    font-size: 13px;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #ecf0f1;
+    border-radius: 4px;
+    font-size: 13px;
+    transition: border-color 0.3s;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #3498db;
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+/* 快速查价样式 */
+.pricing-section {
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+}
+
+.pricing-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #ecf0f1;
+}
+
+.pricing-header h3 {
+    color: #2c3e50;
+    margin: 0;
+}
+
+.pricing-form {
+    margin-bottom: 15px;
+}
+
+.pricing-row {
+    background: #f8f9fa;
+    padding: 10px;
+    border-radius: 6px;
+    margin-bottom: 8px;
+    border: 1px solid #ecf0f1;
+    position: relative;
+    z-index: 1;
+}
+
+.pricing-row-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.pricing-row-header h4 {
+    color: #2c3e50;
+    margin: 0;
+}
+
+.remove-pricing-row {
+    background: #e74c3c;
+    color: white;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 11px;
+}
+
+.pricing-row-content {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 6px;
+    align-items: center;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    scrollbar-width: thin;
+    scrollbar-color: #bdc3c7 #ecf0f1;
+    position: relative;
+    z-index: 5;
+}
+
+.pricing-row-content::-webkit-scrollbar {
+    height: 4px;
+}
+
+.pricing-row-content::-webkit-scrollbar-track {
+    background: #ecf0f1;
+    border-radius: 2px;
+}
+
+.pricing-row-content::-webkit-scrollbar-thumb {
+    background: #bdc3c7;
+    border-radius: 2px;
+}
+
+.pricing-row-content::-webkit-scrollbar-thumb:hover {
+    background: #95a5a6;
+}
+
+.pricing-row-content .form-group {
+    flex-shrink: 0;
+    min-width: 100px;
+    margin-bottom: 0;
+}
+
+.pricing-row-content .form-group label {
+    margin-bottom: 2px;
+    font-size: 11px;
+}
+
+.pricing-row-content .form-group input,
+.pricing-row-content .form-group select {
+    padding: 4px 6px;
+    font-size: 11px;
+    position: relative;
+    z-index: 10;
+}
+
+.pricing-row-content .form-group select {
+    z-index: 20;
+}
+
+.pricing-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 15px;
+}
+
+.pricing-results {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 6px;
+    border-left: 4px solid #3498db;
+}
+
+/* 按钮样式 */
+.btn-primary {
+    background: #3498db;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    transition: background 0.3s;
+}
+
+.btn-primary:hover {
+    background: #2980b9;
+}
+
+.btn-secondary {
+    background: #95a5a6;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: background 0.3s;
+}
+
+.btn-secondary:hover {
+    background: #7f8c8d;
+}
+
+.btn-danger {
+    background: #e74c3c;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: background 0.3s;
+}
+
+.btn-danger:hover {
+    background: #c0392b;
+}
+
+/* 产品明细 */
+.product-item {
+    background: #f8f9fa;
+    padding: 10px;
+    border-radius: 6px;
+    margin-bottom: 8px;
+    border: 1px solid #ecf0f1;
+    position: relative;
+    z-index: 1;
+}
+
+.product-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.product-item-header h4 {
+    color: #2c3e50;
+}
+
+.remove-product {
+    background: #e74c3c;
+    color: white;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 11px;
+}
+
+.product-item-content {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 6px;
+    align-items: center;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    scrollbar-width: thin;
+    scrollbar-color: #bdc3c7 #ecf0f1;
+    position: relative;
+    z-index: 5;
+}
+
+.product-item-content::-webkit-scrollbar {
+    height: 4px;
+}
+
+.product-item-content::-webkit-scrollbar-track {
+    background: #ecf0f1;
+    border-radius: 2px;
+}
+
+.product-item-content::-webkit-scrollbar-thumb {
+    background: #bdc3c7;
+    border-radius: 2px;
+}
+
+.product-item-content::-webkit-scrollbar-thumb:hover {
+    background: #95a5a6;
+}
+
+.product-item-content .form-group {
+    flex-shrink: 0;
+    min-width: 100px;
+    margin-bottom: 0;
+}
+
+.product-item-content .form-group label {
+    margin-bottom: 2px;
+    font-size: 11px;
+}
+
+.product-item-content .form-group input,
+.product-item-content .form-group select {
+    padding: 4px 6px;
+    font-size: 11px;
+    position: relative;
+    z-index: 10;
+}
+
+.product-item-content .form-group select {
+    z-index: 20;
+}
+
+.product-item-content .form-group select:focus {
+    z-index: 300;
+}
+
+.product-item-content .form-group select option {
+    z-index: 400;
+    background: white;
+    color: #333;
+    padding: 8px;
+}
+
+.product-item-content .form-group:nth-child(1) { /* 品类 */
+    min-width: 80px;
+}
+
+.product-item-content .form-group:nth-child(2) { /* 系统 */
+    min-width: 80px;
+}
+
+.product-item-content .form-group:nth-child(3) { /* 产品编号1 */
+    min-width: 90px;
+}
+
+.product-item-content .form-group:nth-child(4) { /* 产品编号2 */
+    min-width: 90px;
+}
+
+.product-item-content .form-group:nth-child(5) { /* 尺寸 */
+    min-width: 100px;
+}
+
+.product-item-content .form-group:nth-child(6) { /* 数量 */
+    min-width: 50px;
+}
+
+.product-item-content .form-group:nth-child(7) { /* 单价 */
+    min-width: 70px;
+}
+
+.product-item-content .form-group:nth-child(8) { /* 小计 */
+    min-width: 70px;
+}
+
+.product-item-content .form-group:nth-child(9) { /* 备注 */
+    min-width: 100px;
+}
+
+/* 附加价格 */
+.additional-prices {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 6px;
+    margin: 15px 0;
+}
+
+.additional-prices .form-group {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.additional-prices .form-group input:first-child {
+    flex: 2;
+}
+
+.additional-prices .form-group input:last-child {
+    flex: 1;
+}
+
+/* 报价汇总 */
+.quotation-summary {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 6px;
+    margin: 15px 0;
+}
+
+.quotation-summary h3 {
+    margin-bottom: 12px;
+    color: #2c3e50;
+    border-bottom: 2px solid #ecf0f1;
+    padding-bottom: 6px;
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid #ecf0f1;
+}
+
+.summary-row label {
+    margin-right: 15px;
+    min-width: 100px;
+    text-align: right;
+}
+
+.summary-row.total {
+    border-bottom: none;
+    font-weight: bold;
+    font-size: 16px;
+    color: #2c3e50;
+    background: #ecf0f1;
+    padding: 12px 15px;
+    margin: 8px -15px -15px -15px;
+    border-radius: 0 0 6px 6px;
+}
+
+.summary-row.total label {
+    font-size: 16px;
+}
+
+.summary-row input {
+    width: 100px;
+    text-align: right;
+    margin-left: 8px;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+
+/* 数据管理 */
+.section {
+    margin-bottom: 30px;
+}
+
+.section h3 {
+    color: #2c3e50;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #ecf0f1;
+    padding-bottom: 8px;
+}
+
+.import-export {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
+
+.price-table-container,
+.product-form,
+.user-form,
+.system-settings {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 6px;
+    margin-bottom: 15px;
+}
+
+/* 表格样式 */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 12px;
+}
+
+th, td {
+    padding: 8px;
+    text-align: left;
+    border-bottom: 1px solid #ecf0f1;
+}
+
+th {
+    background: #ecf0f1;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+tr:hover {
+    background: #f8f9fa;
+}
+
+/* 响应式设计 */
+@media (max-width: 1200px) {
+    .pricing-row-content,
+    .product-item-content {
+        gap: 6px;
+    }
+    
+    .pricing-row-content .form-group,
+    .product-item-content .form-group {
+        min-width: 90px;
+    }
+    
+    .pricing-row-content .form-group:nth-child(1) { /* 序号 */
+        min-width: 25px;
+    }
+    
+    .pricing-row-content .form-group:nth-child(2),
+    .pricing-row-content .form-group:nth-child(3),
+    .product-item-content .form-group:nth-child(1),
+    .product-item-content .form-group:nth-child(2) {
+        min-width: 70px;
+    }
+    
+    .pricing-row-content .form-group:nth-child(4),
+    .pricing-row-content .form-group:nth-child(5),
+    .product-item-content .form-group:nth-child(3),
+    .product-item-content .form-group:nth-child(4) {
+        min-width: 80px;
+    }
+    
+    .pricing-row-content .form-group:nth-child(6),
+    .pricing-row-content .form-group:nth-child(7),
+    .product-item-content .form-group:nth-child(5),
+    .product-item-content .form-group:nth-child(6) {
+        min-width: 45px;
+    }
+    
+    .pricing-row-content .form-group:nth-child(8),
+    .product-item-content .form-group:nth-child(7) {
+        min-width: 35px;
+    }
+    
+    .pricing-row-content .form-group:nth-child(9),
+    .pricing-row-content .form-group:nth-child(10),
+    .pricing-row-content .form-group:nth-child(11),
+    .product-item-content .form-group:nth-child(8),
+    .product-item-content .form-group:nth-child(9) {
+        min-width: 55px;
+    }
+    
+    .pricing-row-content .form-group:nth-child(12) { /* 删除按钮 */
+        min-width: 45px;
+    }
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 8px;
+    }
+    
+    .card {
+        padding: 12px;
+    }
+    
+    .form-row {
+        flex-direction: column;
+        gap: 0;
+    }
+    
+    .pricing-row-content,
+    .product-item-content {
+        flex-direction: column;
+        gap: 10px;
+        overflow-x: visible;
+    }
+    
+    .pricing-row-content .form-group,
+    .product-item-content .form-group {
+        min-width: auto;
+        width: 100%;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+    }
+    
+    .header-controls {
+        flex-wrap: wrap;
+    }
+    
+    .header-top {
+        flex-direction: column;
+        gap: 12px;
+        text-align: center;
+    }
+    
+    .pricing-actions {
+        flex-direction: column;
+    }
+    
+    .additional-prices .form-group {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}
+
+/* 金额显示样式 */
+.currency {
+    font-family: 'Courier New', monospace;
+    font-weight: 600;
+    color: #27ae60;
+}
+
+/* 状态标签 */
+.status-tag {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.status-draft {
+    background: #f39c12;
+    color: white;
+}
+
+.status-sent {
+    background: #3498db;
+    color: white;
+}
+
+.status-confirmed {
+    background: #27ae60;
+    color: white;
+}
+
+.status-cancelled {
+    background: #e74c3c;
+    color: white;
+}
+
+/* 双语切换 */
+.language-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+}
+
+.language-btn {
+    background: #34495e;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.language-btn:hover {
+    background: #2c3e50;
+}
+
+/* 序号列特殊样式 */
+.pricing-row-content .form-group:nth-child(1) input { /* 序号输入框 */
+    text-align: center;
+    background: #e8f5e8 !important;
+    color: #27ae60;
+    font-weight: bold;
+    border: 1px solid #27ae60;
+}
+
+.pricing-row-content .form-group:nth-child(1) label { /* 序号标签 */
+    color: #27ae60;
+    font-weight: bold;
+}
+
+/* 确保下拉菜单容器有足够的z-index */
+.pricing-row-content,
+.product-item-content {
+    position: relative;
+    z-index: 5;
+}
+
+/* 为所有下拉菜单设置更高的z-index */
+.form-group select {
+    z-index: 500 !important;
+    position: relative;
+}
+
+.form-group select:focus {
+    z-index: 600 !important;
+}
+
+.form-group select option {
+    z-index: 700 !important;
+    background: white !important;
+    color: #333 !important;
+    padding: 8px !important;
+}
+
+/* 强制确保下拉菜单选项显示 */
+select {
+    z-index: 9999 !important;
+    position: relative !important;
+}
+
+select:focus {
+    z-index: 10000 !important;
+}
+
+select option {
+    z-index: 10001 !important;
+    background: white !important;
+    color: #333 !important;
+    padding: 8px !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+/* 确保下拉菜单容器不遮挡选项 */
+.pricing-row-content,
+.product-item-content {
+    overflow: visible !important;
+}
+
+.pricing-row-content .form-group,
+.product-item-content .form-group {
+    overflow: visible !important;
+}
