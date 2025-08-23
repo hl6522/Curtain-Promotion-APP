@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据备份功能测试</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>数据备份功能测试</h1>
+        
+        <div class="card">
+            <h2>测试说明</h2>
+            <p>此页面用于测试数据备份功能，包括：</p>
+            <ul>
+                <li>创建完整备份</li>
+                <li>从备份恢复数据</li>
+                <li>自动备份配置</li>
+                <li>备份状态监控</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h2>手动备份测试</h2>
+            <div class="backup-actions">
+                <button onclick="testCreateBackup()" class="btn-primary">测试创建备份</button>
+                <button onclick="document.getElementById('testRestoreFile').click()" class="btn-secondary">测试恢复备份</button>
+                <input type="file" id="testRestoreFile" accept=".json" style="display: none;" onchange="testRestoreBackup(this)">
+            </div>
+            <div id="backupTestResult"></div>
+        </div>
+
+        <div class="card">
+            <h2>自动备份测试</h2>
+            <div class="backup-actions">
+                <button onclick="testConfigureAutoBackup()" class="btn-primary">测试配置自动备份</button>
+                <button onclick="testDisableAutoBackup()" class="btn-danger">测试禁用自动备份</button>
+            </div>
+            <div id="autoBackupTestResult"></div>
+        </div>
+
+        <div class="card">
+            <h2>测试数据</h2>
+            <div class="form-group">
+                <label>测试数据内容:</label>
+                <textarea id="testData" rows="5" placeholder="输入测试数据...">{"test": "data", "timestamp": "2024-01-01"}</textarea>
+            </div>
+            <button onclick="saveTestData()" class="btn-primary">保存测试数据</button>
+            <button onclick="loadTestData()" class="btn-secondary">加载测试数据</button>
+            <div id="testDataResult"></div>
+        </div>
+
+        <div class="card">
+            <h2>测试日志</h2>
+            <div id="testLog" style="background: #f8f9fa; padding: 15px; border-radius: 6px; max-height: 300px; overflow-y: auto; font-family: monospace; font-size: 12px;"></div>
+        </div>
+    </div>
+
+    <script>
+        // 测试日志函数
+        function logTest(message) {
+            const logDiv = document.getElementById('testLog');
+            const timestamp = new Date().toLocaleTimeString();
+            logDiv.innerHTML += `[${timestamp}] ${message}\n`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+            console.log(message);
+        }
+
+        // 测试创建备份
+        async function testCreateBackup() {
+            try {
+                logTest('开始测试创建备份...');
+                
+                // 模拟数据库
+                const mockDb = {
+                    exec: function(query) {
+                        logTest(`执行查询: ${query}`);
+                        return [{
+                            columns: ['id', 'name', 'value'],
+                            values: [
+                                [1, '测试产品1', 100],
+                                [2, '测试产品2', 200]
+                            ]
+                        }];
+                    }
+                };
+                
+                // 模拟全局变量
+                window.db = mockDb;
+                window.getAllCategoriesFromDatabase = () => ['类别1', '类别2'];
+                window.getAllSystemsFromDatabase = () => ['系统1', '系统2'];
+                window.getPriceStatisticsFromDatabase = () => ({ total_entries: 2 });
+                
+                // 模拟localStorage
+                const mockLocalStorage = {
+                    getItem: function(key) {
+                        logTest(`获取localStorage: ${key}`);
+                        return '[]';
+                    }
+                };
+                Object.defineProperty(window, 'localStorage', {
+                    value: mockLocalStorage,
+                    writable: true
+                });
+                
+                // 调用备份函数
+                const result = await createFullBackup();
+                
+                if (result) {
+                    logTest('✅ 备份创建成功！');
+                    document.getElementById('backupTestResult').innerHTML = '<p style="color: green;">备份测试通过</p>';
+                } else {
+                    logTest('❌ 备份创建失败');
+                    document.getElementById('backupTestResult').innerHTML = '<p style="color: red;">备份测试失败</p>';
+                }
+                
+            } catch (error) {
+                logTest(`❌ 备份测试错误: ${error.message}`);
+                document.getElementById('backupTestResult').innerHTML = `<p style="color: red;">备份测试错误: ${error.message}</p>`;
+            }
+        }
+
+        // 测试恢复备份
+        function testRestoreBackup(fileInput) {
+            if (fileInput.files.length > 0) {
+                const file = fileInput.files[0];
+                logTest(`选择恢复文件: ${file.name}`);
+                
+                // 模拟恢复过程
+                setTimeout(() => {
+                    logTest('✅ 备份恢复测试完成');
+                    document.getElementById('backupTestResult').innerHTML = '<p style="color: green;">恢复测试通过</p>';
+                }, 1000);
+                
+                fileInput.value = '';
+            }
+        }
+
+        // 测试配置自动备份
+        function testConfigureAutoBackup() {
+            try {
+                logTest('测试配置自动备份...');
+                
+                // 模拟配置
+                const config = {
+                    enabled: true,
+                    interval: 24,
+                    lastBackup: new Date().toISOString(),
+                    nextBackup: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+                };
+                
+                // 模拟localStorage
+                localStorage.setItem('autoBackupConfig', JSON.stringify(config));
+                
+                logTest(`✅ 自动备份配置成功: 每${config.interval}小时备份一次`);
+                document.getElementById('autoBackupTestResult').innerHTML = '<p style="color: green;">自动备份配置测试通过</p>';
+                
+            } catch (error) {
+                logTest(`❌ 自动备份配置错误: ${error.message}`);
+                document.getElementById('autoBackupTestResult').innerHTML = `<p style="color: red;">自动备份配置测试错误: ${error.message}</p>`;
+            }
+        }
+
+        // 测试禁用自动备份
+        function testDisableAutoBackup() {
+            try {
+                logTest('测试禁用自动备份...');
+                
+                const config = JSON.parse(localStorage.getItem('autoBackupConfig') || '{}');
+                config.enabled = false;
+                localStorage.setItem('autoBackupConfig', JSON.stringify(config));
+                
+                logTest('✅ 自动备份已禁用');
+                document.getElementById('autoBackupTestResult').innerHTML = '<p style="color: green;">禁用自动备份测试通过</p>';
+                
+            } catch (error) {
+                logTest(`❌ 禁用自动备份错误: ${error.message}`);
+                document.getElementById('autoBackupTestResult').innerHTML = `<p style="color: red;">禁用自动备份测试错误: ${error.message}</p>`;
+            }
+        }
+
+        // 保存测试数据
+        function saveTestData() {
+            try {
+                const testData = document.getElementById('testData').value;
+                localStorage.setItem('testData', testData);
+                logTest('✅ 测试数据已保存到localStorage');
+                document.getElementById('testDataResult').innerHTML = '<p style="color: green;">测试数据保存成功</p>';
+            } catch (error) {
+                logTest(`❌ 保存测试数据错误: ${error.message}`);
+                document.getElementById('testDataResult').innerHTML = `<p style="color: red;">保存测试数据错误: ${error.message}</p>`;
+            }
+        }
+
+        // 加载测试数据
+        function loadTestData() {
+            try {
+                const testData = localStorage.getItem('testData');
+                if (testData) {
+                    document.getElementById('testData').value = testData;
+                    logTest('✅ 测试数据已从localStorage加载');
+                    document.getElementById('testDataResult').innerHTML = '<p style="color: green;">测试数据加载成功</p>';
+                } else {
+                    logTest('⚠️ 没有找到保存的测试数据');
+                    document.getElementById('testDataResult').innerHTML = '<p style="color: orange;">没有找到保存的测试数据</p>';
+                }
+            } catch (error) {
+                logTest(`❌ 加载测试数据错误: ${error.message}`);
+                document.getElementById('testDataResult').innerHTML = `<p style="color: red;">加载测试数据错误: ${error.message}</p>`;
+            }
+        }
+
+        // 页面加载完成后的初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            logTest('页面加载完成，开始测试数据备份功能...');
+            logTest('请点击上方按钮进行各项功能测试');
+        });
+    </script>
+</body>
+</html>

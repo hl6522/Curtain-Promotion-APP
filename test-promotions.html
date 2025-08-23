@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Promotion System</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f5f5f5; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background: #f9f9f9; }
+        .test-section h3 { margin-top: 0; color: #333; }
+        button { margin: 5px; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-secondary { background: #6c757d; color: white; }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        button:hover { opacity: 0.8; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; background: white; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        th { background-color: #f2f2f2; font-weight: bold; }
+        .log { background: #f8f9fa; padding: 10px; margin: 10px 0; border-radius: 3px; font-family: monospace; font-size: 12px; }
+        .log-success { color: #28a745; }
+        .log-error { color: #dc3545; }
+        .log-info { color: #17a2b8; }
+        .log-warning { color: #ffc107; }
+        .status { padding: 10px; margin: 10px 0; border-radius: 4px; }
+        .status-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .status-error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .promotion-form { background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #dee2e6; }
+        .form-row { display: flex; gap: 15px; margin-bottom: 15px; }
+        .form-group { flex: 1; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: 600; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 8px; border: 1px solid #ced4da; border-radius: 4px; }
+        .form-group textarea { height: 60px; resize: vertical; }
+        .status-active { color: #28a745; font-weight: bold; }
+        .status-expired { color: #dc3545; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Test Promotion System</h1>
+        
+        <div class="test-section">
+            <h3>System Status</h3>
+            <div id="systemStatus">Loading...</div>
+        </div>
+        
+        <div class="test-section">
+            <h3>Create Promotion</h3>
+            <div class="promotion-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Promotion Name:</label>
+                        <input type="text" id="promotionName" placeholder="Enter promotion name">
+                    </div>
+                    <div class="form-group">
+                        <label>Product Category:</label>
+                        <select id="promotionCategory">
+                            <option value="">All Categories</option>
+                            <option value="标准产品">标准产品</option>
+                            <option value="定制产品">定制产品</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>System:</label>
+                        <select id="promotionSystem">
+                            <option value="">All Systems</option>
+                            <option value="Standard System">Standard System</option>
+                            <option value="Premium System">Premium System</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Product Code:</label>
+                        <input type="text" id="promotionCode" placeholder="Enter product code (optional)">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Size Category:</label>
+                        <select id="promotionSizeCategory">
+                            <option value="">All Sizes</option>
+                            <option value="small">Small (30-55cm)</option>
+                            <option value="medium">Medium (58-116cm)</option>
+                            <option value="large">Large (119-262cm)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Discount Percentage (%):</label>
+                        <input type="number" id="promotionDiscount" min="1" max="99" placeholder="10">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Start Date:</label>
+                        <input type="date" id="promotionStartDate">
+                    </div>
+                    <div class="form-group">
+                        <label>End Date:</label>
+                        <input type="date" id="promotionEndDate">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Description:</label>
+                        <textarea id="promotionDescription" placeholder="Enter promotion description"></textarea>
+                    </div>
+                </div>
+                <button onclick="createPromotion()" class="btn-primary">Create Promotion</button>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h3>Test Controls</h3>
+            <button onclick="testPromotions()" class="btn-primary">Test Promotions</button>
+            <button onclick="testPromotionMatching()" class="btn-success">Test Promotion Matching</button>
+            <button onclick="clearLogs()" class="btn-secondary">Clear Logs</button>
+            <button onclick="resetSystem()" class="btn-danger">Reset System</button>
+        </div>
+        
+        <div class="test-section">
+            <h3>Active Promotions</h3>
+            <div id="promotionTableDisplay"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>Test Logs</h3>
+            <div id="testLogs"></div>
+        </div>
+    </div>
+
+    <script>
+        // 全局变量
+        let priceTable = [];
+        let promotions = [];
+        
+        // 页面加载完成后初始化
+        window.onload = function() {
+            addLog('Page loaded, initializing system...', 'info');
+            initializeSystem();
+            loadData();
+            updateSystemStatus();
+            setDefaultPromotionDates();
+        };
+        
+        // 初始化系统
+        function initializeSystem() {
+            try {
+                // 初始化默认价格表
+                if (!localStorage.getItem('priceTable')) {
+                    const defaultPriceTable = [
+                        { category: "标准产品", widthMin: 30.5, widthMax: 55.8, heightMin: 35.6, heightMax: 63.5, price: 18.19 },
+                        { category: "标准产品", widthMin: 58.5, widthMax: 86.4, heightMin: 35.6, heightMax: 63.5, price: 22.89 },
+                        { category: "标准产品", widthMin: 88.9, widthMax: 116.8, heightMin: 35.6, heightMax: 63.5, price: 28.10 },
+                        { category: "标准产品", widthMin: 119.5, widthMax: 147.3, heightMin: 35.6, heightMax: 63.5, price: 33.06 },
+                        { category: "标准产品", widthMin: 149.8, widthMax: 175.3, heightMin: 35.6, heightMax: 63.5, price: 37.41 }
+                    ];
+                    localStorage.setItem('priceTable', JSON.stringify(defaultPriceTable));
+                    addLog('Default price table created: ' + defaultPriceTable.length + ' entries', 'success');
+                }
+                
+                // 初始化默认促销活动
+                if (!localStorage.getItem('promotions')) {
+                    const defaultPromotions = [
+                        {
+                            id: 1,
+                            name: "春季特惠",
+                            category: "标准产品",
+                            system: "Standard System",
+                            code: "",
+                            sizeCategory: "medium",
+                            discount: 15,
+                            startDate: "2024-03-01",
+                            endDate: "2024-05-31",
+                            description: "春季标准产品8.5折优惠",
+                            active: true
+                        }
+                    ];
+                    localStorage.setItem('promotions', JSON.stringify(defaultPromotions));
+                    addLog('Default promotions created: ' + defaultPromotions.length + ' entries', 'success');
+                }
+                
+                addLog('System initialization completed', 'success');
+            } catch (error) {
+                addLog('Error in system initialization: ' + error.message, 'error');
+            }
+        }
+        
+        // 加载数据
+        function loadData() {
+            try {
+                priceTable = JSON.parse(localStorage.getItem('priceTable') || '[]');
+                promotions = JSON.parse(localStorage.getItem('promotions') || '[]');
+                
+                addLog('Data loaded successfully', 'success');
+                addLog('PriceTable: ' + priceTable.length + ' entries', 'info');
+                addLog('Promotions: ' + promotions.length + ' entries', 'info');
+            } catch (error) {
+                addLog('Error loading data: ' + error.message, 'error');
+            }
+        }
+        
+        // 测试促销活动
+        function testPromotions() {
+            addLog('Testing promotions...', 'info');
+            
+            try {
+                // 测试促销活动创建
+                if (promotions.length > 0) {
+                    addLog('Promotions available: ' + promotions.length, 'success');
+                    promotions.forEach((promotion, index) => {
+                        const isActive = isPromotionActive(promotion);
+                        addLog(`Promotion ${index + 1}: ${promotion.name} - ${isActive ? 'Active' : 'Expired'}`, isActive ? 'success' : 'warning');
+                    });
+                } else {
+                    addLog('No promotions available', 'warning');
+                }
+                
+                // 测试促销活动匹配
+                testPromotionMatching();
+                
+                addLog('Promotion test completed', 'success');
+            } catch (error) {
+                addLog('Promotion test error: ' + error.message, 'error');
+            }
+        }
+        
+        // 测试促销活动匹配
+        function testPromotionMatching() {
+            addLog('Testing promotion matching...', 'info');
+            
+            try {
+                // 测试用例1：标准产品，中型尺寸
+                const testCase1 = getApplicablePromotions("标准产品", "Standard System", "", 80, 60);
+                addLog(`Test case 1 (标准产品, Standard System, 80x60): ${testCase1.length} applicable promotions`, 'info');
+                
+                // 测试用例2：定制产品，大型尺寸
+                const testCase2 = getApplicablePromotions("定制产品", "Premium System", "", 200, 100);
+                addLog(`Test case 2 (定制产品, Premium System, 200x100): ${testCase2.length} applicable promotions`, 'info');
+                
+                // 测试用例3：标准产品，小型尺寸
+                const testCase3 = getApplicablePromotions("标准产品", "Standard System", "", 40, 50);
+                addLog(`Test case 3 (标准产品, Standard System, 40x50): ${testCase3.length} applicable promotions`, 'info');
+                
+                addLog('Promotion matching test completed', 'success');
+            } catch (error) {
+                addLog('Promotion matching test error: ' + error.message, 'error');
+            }
+        }
+        
+        // 创建促销活动
+        function createPromotion() {
+            try {
+                const name = document.getElementById('promotionName').value.trim();
+                const category = document.getElementById('promotionCategory').value;
+                const system = document.getElementById('promotionSystem').value;
+                const code = document.getElementById('promotionCode').value.trim();
+                const sizeCategory = document.getElementById('promotionSizeCategory').value;
+                const discount = parseInt(document.getElementById('promotionDiscount').value);
+                const startDate = document.getElementById('promotionStartDate').value;
+                const endDate = document.getElementById('promotionEndDate').value;
+                const description = document.getElementById('promotionDescription').value.trim();
+                
+                // 验证必填字段
+                if (!name || !discount || !startDate || !endDate) {
+                    alert('请填写必填字段：活动名称、折扣比例、开始日期、结束日期');
+                    return;
+                }
+                
+                if (discount < 1 || discount > 99) {
+                    alert('折扣比例必须在1-99之间');
+                    return;
+                }
+                
+                if (new Date(startDate) >= new Date(endDate)) {
+                    alert('结束日期必须晚于开始日期');
+                    return;
+                }
+                
+                // 创建新促销活动
+                const newPromotion = {
+                    id: Date.now(),
+                    name: name,
+                    category: category,
+                    system: system,
+                    code: code,
+                    sizeCategory: sizeCategory,
+                    discount: discount,
+                    startDate: startDate,
+                    endDate: endDate,
+                    description: description,
+                    active: true
+                };
+                
+                promotions.push(newPromotion);
+                localStorage.setItem('promotions', JSON.stringify(promotions));
+                
+                // 清空表单
+                clearPromotionForm();
+                
+                // 刷新显示
+                displayPromotionTable();
+                
+                addLog(`促销活动"${name}"创建成功`, 'success');
+                alert('促销活动创建成功！');
+                
+            } catch (error) {
+                addLog('创建促销活动时发生错误: ' + error.message, 'error');
+                alert('创建促销活动失败: ' + error.message);
+            }
+        }
+        
+        // 清空促销活动表单
+        function clearPromotionForm() {
+            document.getElementById('promotionName').value = '';
+            document.getElementById('promotionCategory').value = '';
+            document.getElementById('promotionSystem').value = '';
+            document.getElementById('promotionCode').value = '';
+            document.getElementById('promotionSizeCategory').value = '';
+            document.getElementById('promotionDiscount').value = '';
+            document.getElementById('promotionStartDate').value = '';
+            document.getElementById('promotionEndDate').value = '';
+            document.getElementById('promotionDescription').value = '';
+        }
+        
+        // 显示促销活动表
+        function displayPromotionTable() {
+            const container = document.getElementById('promotionTableDisplay');
+            
+            if (!container) {
+                addLog('Promotion table container not found', 'error');
+                return;
+            }
+            
+            if (promotions.length === 0) {
+                container.innerHTML = '<p>No promotion data available</p>';
+                return;
+            }
+            
+            let html = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>活动名称</th>
+                            <th>产品类别</th>
+                            <th>系统</th>
+                            <th>尺寸类别</th>
+                            <th>折扣(%)</th>
+                            <th>有效期</th>
+                            <th>状态</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            promotions.forEach(promotion => {
+                const isActive = isPromotionActive(promotion);
+                const statusClass = isActive ? 'active' : 'expired';
+                const statusText = isActive ? '有效' : '已过期';
+                
+                html += `
+                    <tr>
+                        <td>${promotion.name}</td>
+                        <td>${promotion.category || '全部'}</td>
+                        <td>${promotion.system || '全部'}</td>
+                        <td>${getSizeCategoryText(promotion.sizeCategory)}</td>
+                        <td>${promotion.discount}%</td>
+                        <td>${promotion.startDate} 至 ${promotion.endDate}</td>
+                        <td><span class="status-${statusClass}">${statusText}</span></td>
+                        <td>
+                            <button onclick="deletePromotion(${promotion.id})" class="btn-danger" style="padding: 4px 8px; font-size: 12px;">删除</button>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            html += '</tbody></table>';
+            container.innerHTML = html;
+            addLog('Promotion table displayed successfully', 'success');
+        }
+        
+        // 删除促销活动
+        function deletePromotion(id) {
+            if (confirm('确定要删除这个促销活动吗？')) {
+                try {
+                    const index = promotions.findIndex(p => p.id === id);
+                    if (index !== -1) {
+                        const deletedName = promotions[index].name;
+                        promotions.splice(index, 1);
+                        localStorage.setItem('promotions', JSON.stringify(promotions));
+                        displayPromotionTable();
+                        addLog(`促销活动"${deletedName}"已删除`, 'success');
+                    }
+                } catch (error) {
+                    addLog('删除促销活动时发生错误: ' + error.message, 'error');
+                }
+            }
+        }
+        
+        // 检查促销活动是否有效
+        function isPromotionActive(promotion) {
+            const now = new Date();
+            const startDate = new Date(promotion.startDate);
+            const endDate = new Date(promotion.endDate);
+            
+            return now >= startDate && now <= endDate && promotion.active;
+        }
+        
+        // 获取尺寸类别文本
+        function getSizeCategoryText(sizeCategory) {
+            switch (sizeCategory) {
+                case 'small': return '小型 (30-55cm)';
+                case 'medium': return '中型 (58-116cm)';
+                case 'large': return '大型 (119-262cm)';
+                default: return '全部尺寸';
+            }
+        }
+        
+        // 获取适用的促销活动
+        function getApplicablePromotions(productCategory, system, code, width, height) {
+            const applicablePromotions = [];
+            
+            promotions.forEach(promotion => {
+                if (!isPromotionActive(promotion)) {
+                    return; // 跳过无效的促销活动
+                }
+                
+                // 检查产品类别匹配
+                if (promotion.category && promotion.category !== productCategory) {
+                    return;
+                }
+                
+                // 检查系统匹配
+                if (promotion.system && promotion.system !== system) {
+                    return;
+                }
+                
+                // 检查产品代码匹配
+                if (promotion.code && promotion.code !== code) {
+                    return;
+                }
+                
+                // 检查尺寸类别匹配
+                if (promotion.sizeCategory) {
+                    const size = getSizeCategory(width, height);
+                    if (size !== promotion.sizeCategory) {
+                        return;
+                    }
+                }
+                
+                applicablePromotions.push(promotion);
+            });
+            
+            return applicablePromotions;
+        }
+        
+        // 根据尺寸确定尺寸类别
+        function getSizeCategory(width, height) {
+            const maxDimension = Math.max(width, height);
+            
+            if (maxDimension <= 55) {
+                return 'small';
+            } else if (maxDimension <= 116) {
+                return 'medium';
+            } else {
+                return 'large';
+            }
+        }
+        
+        // 设置默认促销日期
+        function setDefaultPromotionDates() {
+            const today = new Date();
+            const nextMonth = new Date();
+            nextMonth.setMonth(today.getMonth() + 1);
+            
+            const todayStr = today.toISOString().split('T')[0];
+            const nextMonthStr = nextMonth.toISOString().split('T')[0];
+            
+            const startDateInput = document.getElementById('promotionStartDate');
+            const endDateInput = document.getElementById('promotionEndDate');
+            
+            if (startDateInput) {
+                startDateInput.value = todayStr;
+            }
+            if (endDateInput) {
+                endDateInput.value = nextMonthStr;
+            }
+        }
+        
+        // 更新系统状态
+        function updateSystemStatus() {
+            const statusContainer = document.getElementById('systemStatus');
+            if (statusContainer) {
+                const status = `
+                    <div class="status status-success">
+                        <strong>System Status:</strong> Ready<br>
+                        <strong>Price Table:</strong> ${priceTable.length} entries<br>
+                        <strong>Promotions:</strong> ${promotions.length} entries
+                    </div>
+                `;
+                statusContainer.innerHTML = status;
+            }
+        }
+        
+        // 重置系统
+        function resetSystem() {
+            if (confirm('Are you sure you want to reset the system? This will clear all data.')) {
+                try {
+                    localStorage.clear();
+                    addLog('System reset completed', 'success');
+                    location.reload();
+                } catch (error) {
+                    addLog('System reset error: ' + error.message, 'error');
+                }
+            }
+        }
+        
+        // 添加日志
+        function addLog(message, type = 'info') {
+            const logsContainer = document.getElementById('testLogs');
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.className = `log log-${type}`;
+            logEntry.innerHTML = `[${timestamp}] ${message}`;
+            
+            logsContainer.appendChild(logEntry);
+            logsContainer.scrollTop = logsContainer.scrollHeight;
+            
+            // 同时在控制台输出
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
+        
+        // 清除日志
+        function clearLogs() {
+            document.getElementById('testLogs').innerHTML = '';
+        }
+    </script>
+</body>
+</html>

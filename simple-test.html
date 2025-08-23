@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Price Table Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; border-radius: 5px; }
+        button { margin: 5px; padding: 8px 15px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .log { background: #f5f5f5; padding: 10px; margin: 10px 0; border-radius: 3px; font-family: monospace; }
+    </style>
+</head>
+<body>
+    <h1>Simple Price Table Test</h1>
+    
+    <div class="test-section">
+        <h3>Test Controls</h3>
+        <button onclick="testBasicDisplay()">Test Basic Display</button>
+        <button onclick="testLocalStorage()">Test LocalStorage</button>
+        <button onclick="clearLog()">Clear Log</button>
+    </div>
+    
+    <div class="test-section">
+        <h3>Price Table Display</h3>
+        <div id="priceTableDisplay"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>Test Log</h3>
+        <div id="testLog"></div>
+    </div>
+
+    <script>
+        // 简化的价目表数据
+        let priceTable = [
+            { category: "标准产品", widthMin: 30.5, widthMax: 55.8, heightMin: 35.6, heightMax: 63.5, price: 18.19 },
+            { category: "标准产品", widthMin: 58.5, widthMax: 86.4, heightMin: 35.6, heightMax: 63.5, price: 22.89 },
+            { category: "标准产品", widthMin: 88.9, widthMax: 116.8, heightMin: 35.6, heightMax: 63.5, price: 28.10 }
+        ];
+        
+        // 测试基本显示功能
+        function testBasicDisplay() {
+            addLog('Testing basic display...', 'info');
+            
+            try {
+                displayPriceTable();
+                addLog('Basic display test completed', 'success');
+            } catch (error) {
+                addLog('Error in basic display test: ' + error.message, 'error');
+            }
+        }
+        
+        // 测试localStorage
+        function testLocalStorage() {
+            addLog('Testing localStorage...', 'info');
+            
+            try {
+                // 保存数据
+                localStorage.setItem('testPriceTable', JSON.stringify(priceTable));
+                addLog('Data saved to localStorage', 'success');
+                
+                // 读取数据
+                const savedData = JSON.parse(localStorage.getItem('testPriceTable'));
+                addLog('Data loaded from localStorage: ' + savedData.length + ' entries', 'success');
+                
+                // 验证数据
+                if (JSON.stringify(savedData) === JSON.stringify(priceTable)) {
+                    addLog('localStorage test passed', 'success');
+                } else {
+                    addLog('localStorage test failed - data mismatch', 'error');
+                }
+            } catch (error) {
+                addLog('localStorage test error: ' + error.message, 'error');
+            }
+        }
+        
+        // 显示价目表
+        function displayPriceTable() {
+            addLog('displayPriceTable called', 'info');
+            addLog('priceTable length: ' + priceTable.length, 'info');
+            
+            const container = document.getElementById('priceTableDisplay');
+            if (!container) {
+                addLog('Container not found!', 'error');
+                return;
+            }
+            
+            if (priceTable.length === 0) {
+                container.innerHTML = '<p>No price data available</p>';
+                addLog('No data to display', 'warning');
+                return;
+            }
+            
+            let html = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>产品类别</th>
+                            <th>宽度范围(cm)</th>
+                            <th>高度范围(cm)</th>
+                            <th>单价(USD)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            priceTable.forEach((item, index) => {
+                html += `
+                    <tr>
+                        <td>${item.category}</td>
+                        <td>${item.widthMin}-${item.widthMax}</td>
+                        <td>${item.heightMin}-${item.heightMax}</td>
+                        <td>$${item.price.toFixed(2)}</td>
+                    </tr>
+                `;
+            });
+            
+            html += '</tbody></table>';
+            container.innerHTML = html;
+            addLog('Price table displayed successfully', 'success');
+        }
+        
+        // 添加日志
+        function addLog(message, type = 'info') {
+            const logContainer = document.getElementById('testLog');
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log';
+            logEntry.innerHTML = `[${timestamp}] ${type.toUpperCase()}: ${message}`;
+            
+            logContainer.appendChild(logEntry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+            
+            // 同时在控制台输出
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
+        
+        // 清除日志
+        function clearLog() {
+            document.getElementById('testLog').innerHTML = '';
+        }
+        
+        // 页面加载完成后自动测试
+        window.onload = function() {
+            addLog('Page loaded, running auto-test', 'info');
+            testBasicDisplay();
+        };
+    </script>
+</body>
+</html>
